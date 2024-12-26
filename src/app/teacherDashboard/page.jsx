@@ -4,14 +4,14 @@ import React, { useState } from "react";
 import Footer from "@/app/Footer";
 import Sidebar from "@/app/Sidebar";
 import Navbar from "@/app/Navbar";
-import ExamResult from "@/app/ExamResult";
 import Calendar from "@/app/Calendar";
+import ExamStatistics from "@/app/ExamStatistics"; 
 
-const DashboardLayout = () => {
+const TeacherDashboard = () => {
   const [activeLink, setActiveLink] = useState("Dashboard");
 
   const personData = {
-    personName: "Jennifer Melfi",
+    personName: "Tony Soprano",
   };
 
   const calendarData = [
@@ -60,13 +60,12 @@ const DashboardLayout = () => {
         {/* Left Column */}
         <div className="w-64 flex flex-col gap-4">
           <Sidebar activeLink={activeLink} setActiveLink={setActiveLink} />
-          {/* Exam Results */}
-          <ExamResult />
+          <ExamStatistics />
         </div>
 
         {/* Right Column */}
         <div className="flex-1 bg-white rounded-lg shadow-md p-6">
-          <Calendar calendarData={calendarData} personData={personData}/>
+          <Calendar calendarData={calendarData} personData={personData} />
         </div>
       </div>
       <Footer />
@@ -74,4 +73,4 @@ const DashboardLayout = () => {
   );
 };
 
-export default DashboardLayout;
+export default TeacherDashboard;
