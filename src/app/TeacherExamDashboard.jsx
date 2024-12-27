@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import {
   Card,
@@ -8,11 +7,12 @@ import {
   Box,
   Chip,
   Container,
+  Divider,
 } from "@mui/material";
-import PersonIcon from '@mui/icons-material/Person';
-import BookIcon from '@mui/icons-material/Book';
+import PersonIcon from "@mui/icons-material/Person";
+import BookIcon from "@mui/icons-material/Book";
 
-export default function TeacherDashboard() {
+export default function TeacherExamDashboard() {
   const [courses, setCourses] = useState([
     {
       id: 1,
@@ -28,7 +28,8 @@ export default function TeacherDashboard() {
       students: 32,
       exams: ["Quiz 1", "Final"],
     },
-    { id:3,
+    {
+      id: 3,
       name: "Data Structures",
       code: "CS301",
       students: 28,
@@ -48,98 +49,95 @@ export default function TeacherDashboard() {
       students: 32,
       exams: ["Quiz 1", "Final"],
     },
-    { id:6,
+    {
+      id: 6,
       name: "Data Structures",
       code: "CS301",
       students: 28,
       exams: ["Midterm", "Final"],
-    }
+    },
   ]);
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
-      {/* Header Card */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Box sx={{ 
-            display: 'flex', 
-            flexDirection: { xs: 'column', md: 'row' }, 
-            justifyContent: 'space-between',
-            alignItems: { xs: 'stretch', md: 'center' },
-            gap: 2
-          }}>
-            <Box>
-              <Typography variant="h4" gutterBottom>
-                My Courses
-              </Typography>
-              <Typography variant="subtitle1" color="text.secondary">
-                Manage your courses and exams
-              </Typography>
-            </Box>
-          </Box>
-        </CardContent>
-      </Card>
+    <Container maxWidth="xl" className="py-10">
+      {/* Header Section */}
+      <Box className="text-center mb-10">
+        <Typography
+          variant="h3"
+          className="font-bold text-gray-800"
+        >
+          My Courses
+        </Typography>
+        <Typography
+          variant="subtitle1"
+          className="mt-2 text-gray-600"
+        >
+          Manage your courses and exams with ease
+        </Typography>
+      </Box>
 
-      {/* Courses Container */}
-      <Box sx={{ 
-        display: 'flex', 
-        flexWrap: 'wrap', 
-        gap: 4,
-      }}>
+      {/* Courses Section */}
+      <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {courses.map((course) => (
-          <Card 
-            key={course.id} 
-            sx={{ 
-              flexBasis: { xs: '100%', sm: 'calc(50% - 24px)', lg: 'calc(33.333% - 24px)' },
-              flexGrow: 0,
-              '&:hover': { 
-                boxShadow: 6,
-                transform: 'translateY(-2px)',
-                transition: 'all 0.2s ease-in-out'
-              }
-            }}
+          <Card
+            key={course.id}
+            className="shadow-lg hover:shadow-2xl transition-transform duration-300 hover:-translate-y-2 bg-slate-50"
           >
             <CardContent>
-              <Box sx={{ mb: 2 }}>
+              <Box className="mb-6 text-center">
                 <Chip
                   label={course.code}
                   size="small"
-                  sx={{ mb: 1 }}
+                  className="mb-2 bg-indigo-100 text-indigo-600"
                 />
-                <Typography variant="h6">{course.name}</Typography>
+                <Typography
+                  variant="h6"
+                  className="font-medium text-gray-800"
+                >
+                  {course.name}
+                </Typography>
               </Box>
 
-              <Box sx={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                mb: 2 
-              }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <PersonIcon color="action" />
-                  <Typography variant="body2">
+              <Divider className="mb-4" />
+
+              <Box className="flex justify-around mb-6">
+                <Box className="flex items-center gap-2">
+                  <PersonIcon fontSize="small" className="text-indigo-600" />
+                  <Typography variant="body2" className="text-gray-600">
                     {course.students} Students
                   </Typography>
                 </Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <BookIcon color="action" />
-                  <Typography variant="body2">
+                <Box className="flex items-center gap-2">
+                  <BookIcon fontSize="small" className="text-indigo-600" />
+                  <Typography variant="body2" className="text-gray-600">
                     {course.exams.length} Exams
                   </Typography>
                 </Box>
               </Box>
 
-              <Box sx={{ 
-                display: 'flex', 
-                gap: 1, 
-                mt: 2 
-              }}>
-                <Button variant="contained" fullWidth size="small" color="secondary">
+              <Box className="flex gap-2">
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="secondary"
+                  className="w-full bg-gradient-to-r from-indigo-500 to-indigo-700 text-white"
+                >
                   View
                 </Button>
-                <Button variant="contained" fullWidth size="small" color="primary">
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="primary"
+                  className="w-full bg-gradient-to-r from-purple-500 to-purple-700 text-white"
+                >
                   Edit
                 </Button>
-                <Button variant="contained" fullWidth size="small" color="error">
+                <Button
+                  variant="contained"
+                  size="small"
+                  color="error"
+                  className="w-full bg-gradient-to-r from-pink-500 to-pink-700 text-white"
+                >
                   Delete
                 </Button>
               </Box>
@@ -147,7 +145,6 @@ export default function TeacherDashboard() {
           </Card>
         ))}
       </Box>
-
     </Container>
   );
 }

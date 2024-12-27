@@ -11,7 +11,7 @@ const TeacherDashboard = () => {
   const [activeLink, setActiveLink] = useState("Dashboard");
 
   const personData = {
-    personName: "Tony Soprano",
+    personName: "Dr. Sarah Johnson",
   };
 
   const calendarData = [
