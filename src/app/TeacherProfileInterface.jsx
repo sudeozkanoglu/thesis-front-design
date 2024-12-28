@@ -41,10 +41,12 @@ const TeacherProfileInterface = () => {
       "Thursday: 1:00 PM - 3:00 PM",
     ],
     currentCourses: [
-      "ENG 101: Introduction to English Literature",
-      "ENG 201: Advanced English Composition",
-      "ENG 301: Linguistic Theories",
-      "ENG 401: Teaching English as a Second Language",
+      "Business English",
+      "Legal English",
+      "Technical English for Engineers",
+      "English for Tourism and Hospitality",
+      "Medical English",
+      "Everyday English Conversation"
     ],
   };
 

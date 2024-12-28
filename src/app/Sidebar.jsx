@@ -5,7 +5,7 @@ import { Home, BookOpen, Settings, HelpCircle, LogOut } from "lucide-react";
 
 const Sidebar = ({ activeLink, setActiveLink }) => {
   const links = [
-    { icon: Home, text: "Dashboard" },
+    { icon: Home, text: "Dashboard"},
     { icon: BookOpen, text: "Exams" },
     { icon: Settings, text: "Profile" },
     { icon: HelpCircle, text: "Help" },
@@ -13,7 +13,7 @@ const Sidebar = ({ activeLink, setActiveLink }) => {
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4">
+    <div className="bg-white rounded-lg shadow-md p-4 ">
       <nav className="space-y-2">
         {links.map(({ icon: Icon, text }) => (
           <a

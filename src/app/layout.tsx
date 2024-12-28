@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ChakraProvider } from '@chakra-ui/react';
 import "./globals.css";
 
 const geistSans = Geist({

@@ -17,7 +17,7 @@ const DashboardLayout = () => {
   const calendarData = [
     {
       id: 1,
-      subject: "Academic Papers",
+      subject: "Business English",
       date: 2,
       time: "10:00",
       endTime: "10:40",
@@ -26,7 +26,7 @@ const DashboardLayout = () => {
     },
     {
       id: 2,
-      subject: "Software UI",
+      subject: "Medical English",
       date: 3,
       time: "14:00",
       endTime: "14:30",
@@ -35,7 +35,7 @@ const DashboardLayout = () => {
     },
     {
       id: 3,
-      subject: "News Articles",
+      subject: "Technical English for Engineers",
       date: 11,
       time: "11:00",
       endTime: "12:00",
@@ -44,7 +44,7 @@ const DashboardLayout = () => {
     },
     {
       id: 4,
-      subject: "Marketing",
+      subject: "English for Tourism and Hospitality",
       date: 12,
       time: "15:00",
       endTime: "16:30",

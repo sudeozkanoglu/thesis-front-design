@@ -6,35 +6,35 @@ const ExamResults = () => {
   const examResults = [
     {
       id: 1,
-      exam: "Medical Translation",
+      exam: "English for Literature",
       score: 95,
       date: "2024-12-20",
       time: "10:00 AM",
     },
     {
       id: 2,
-      exam: "Technical Manual",
+      exam: "Medical English",
       score: 82,
       date: "2024-12-18",
       time: "2:00 PM",
     },
     {
       id: 3,
-      exam: "Legal Documents",
+      exam: "Business English",
       score: 55,
       date: "2024-12-15",
       time: "11:30 AM",
     },
     {
       id: 4,
-      exam: "Literary Works",
+      exam: "Everyday English Conversation",
       score: 40,
       date: "2024-12-10",
       time: "3:00 PM",
     },
     {
       id: 5,
-      exam: "Business",
+      exam: "English for Digital Media",
       score: 75,
       date: "2024-12-05",
       time: "1:00 PM",
@@ -49,7 +49,7 @@ const ExamResults = () => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 text-black">
+    <div className="bg-white rounded-lg shadow-md p-4 text-black ">
       <h3 className="text-lg font-semibold mb-4">Latest 5 Exam Results</h3>
       <div className="space-y-3">
         {examResults.map((result) => (

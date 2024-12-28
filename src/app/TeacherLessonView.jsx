@@ -12,20 +12,20 @@ import {
 
 const TeacherLessonView = () => {
   const lessonContent = {
-    title: "Advanced Mathematics",
-    description: "Complex mathematical concepts and problem-solving techniques",
+    title: "Technical English for Engineers",
+    description: "Essential technical terminology and communication skills for engineering contexts and problem-solving",
     totalExams: 5,
     completedExams: 3,
     exams: [
       {
         id: 1,
-        title: "Calculus Basics",
+        title: "Speaking Assestment A",
         status: "completed",
-        score: 85,
+        score: 86,
         timeSpent: "45 min",
         totalQuestions: 20,
         correctAnswers: 17,
-        completedDate: "2024-03-15",
+        completedDate: "2024-15-11",
         studentResults: [
           { name: "Score 90+", count: 15 },
           { name: "Score 80-89", count: 25 },
@@ -35,13 +35,13 @@ const TeacherLessonView = () => {
       },
       {
         id: 2,
-        title: "Linear Algebra",
+        title: "Speaking Assestment B",
         status: "completed",
-        score: 92,
+        score: 78,
         timeSpent: "38 min",
         totalQuestions: 15,
         correctAnswers: 14,
-        completedDate: "2024-03-18",
+        completedDate: "2024-28-11",
         studentResults: [
           { name: "Score 90+", count: 20 },
           { name: "Score 80-89", count: 22 },
@@ -51,13 +51,19 @@ const TeacherLessonView = () => {
       },
       {
         id: 3,
-        title: "Differential Equations",
+        title: "Speaking Assestment C",
+        status: "pending",
+        dueDate: "2024-25-12"
+      },
+      {
+        id: 4,
+        title: "Midterm Test",
         status: "completed",
-        score: 78,
+        score: 90,
         timeSpent: "50 min",
         totalQuestions: 25,
         correctAnswers: 20,
-        completedDate: "2024-03-20",
+        completedDate: "2024-10-12",
         studentResults: [
           { name: "Score 90+", count: 12 },
           { name: "Score 80-89", count: 28 },
@@ -66,10 +72,10 @@ const TeacherLessonView = () => {
         ]
       },
       {
-        id: 4,
-        title: "Complex Analysis",
+        id: 5,
+        title: "Final Exam",
         status: "pending",
-        dueDate: "2024-04-01"
+        dueDate: "2025-10-01"
       }
     ]
   };
@@ -148,7 +154,7 @@ const TeacherLessonView = () => {
               </Badge>
             </div>
             <div>
-              <p className="text-sm text-gray-600 mb-2">Overall Progress</p>
+              <p className="text-sm font-semibold  text-gray-600 mb-2">Overall Progress</p>
               <progress
                 value={(lessonContent.completedExams / lessonContent.totalExams) * 100}
                 className="h-3"

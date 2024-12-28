@@ -72,7 +72,7 @@ const AudioExamInterface = () => {
       {/* Exam Header */}
       <div className="bg-white rounded-lg shadow-md p-4 mb-6">
         <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-slate-800">Business Document - Final Exam</h1>
+          <h1 className="text-2xl font-bold text-slate-800">English for Tourism and Hospitality - Final Exam</h1>
           <div className="flex items-center gap-2 text-slate-600">
             <Clock className="w-5 h-5" />
             <span className="font-mono">{formatTime(timeLeft)}</span>
@@ -138,7 +138,7 @@ const AudioExamInterface = () => {
           <button
             onClick={() => setCurrentQuestion(prev => Math.max(0, prev - 1))}
             disabled={currentQuestion === 0}
-            className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-slate-100 disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 rounded-md bg-blue-800 hover:bg-blue-600 "
           >
             <ChevronLeft className="w-5 h-5" />
             Previous
@@ -152,7 +152,7 @@ const AudioExamInterface = () => {
           ) : (
             <button
               onClick={() => setCurrentQuestion(prev => Math.min(questions.length - 1, prev + 1))}
-              className="flex items-center gap-2 px-4 py-2 rounded-md hover:bg-slate-100"
+              className="flex items-center gap-2 px-4 py-2 rounded-md bg-blue-800 hover:bg-blue-600"
             >
               Next
               <ChevronRight className="w-5 h-5" />

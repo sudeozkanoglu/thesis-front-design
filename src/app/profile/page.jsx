@@ -13,7 +13,7 @@ const DashboardLayout = () => {
 
   const courses = [
     {
-      title: "Medical Translation",
+      title: "Everyday English Conversation",
       exams: [
         { name: "Speaking Assestment A", score: 85 },
         { name: "Speaking Assestment B", score: 92 },
@@ -24,7 +24,7 @@ const DashboardLayout = () => {
       ],
     },
     {
-      title: "Technical Manual",
+      title: "English for Digital Media",
       exams: [
         { name: "Speaking Assestment A", score: 82 },
         { name: "Speaking Assestment B", score: "" },
@@ -35,18 +35,18 @@ const DashboardLayout = () => {
       ],
     },
     {
-      title: "Legal Documents",
+      title: "Technical English for Engineers",
       exams: [
-        { name: "Speaking Assestment A", score: 55 },
-        { name: "Speaking Assestment B", score: "" },
+        { name: "Speaking Assestment A", score: 86 },
+        { name: "Speaking Assestment B", score: 78 },
         { name: "Speaking Assestment C", score: "" },
         { name: "Speaking Assestment D", score: "" },
-        { name: "Writing Test", score: 90 },
+        { name: "Midterm Test", score: 90 },
         { name: "Final Exam", score: "" },
       ],
     },
     {
-      title: "Literary Works",
+      title: "English for Tourism and Hospitality",
       exams: [
         { name: "Speaking Assestment A", score: 78 },
         { name: "Speaking Assestment B", score: 85 },
@@ -57,7 +57,7 @@ const DashboardLayout = () => {
       ],
     },
     {
-      title: "Business",
+      title: "English for Literature",
       exams: [
         { name: "Speaking Assestment A", score: 78 },
         { name: "Speaking Assestment B", score: "" },
@@ -68,7 +68,7 @@ const DashboardLayout = () => {
       ],
     },
     {
-      title: "Legal Translation",
+      title: "Medical English",
       exams: [
         { name: "Speaking Assestment A", score: 90 },
         { name: "Speaking Assestment B", score: 85 },
@@ -79,7 +79,7 @@ const DashboardLayout = () => {
       ],
     },
     {
-      title: "Business Documents",
+      title: "Business English",
       exams: [
         { name: "Speaking Assestment A", score: 78 },
         { name: "Speaking Assestment B", score: 85 },
