@@ -1,10 +1,10 @@
 "use client";
 import React, { useState } from "react";
 import { Search, User, UserCog, Laptop, LifeBuoy, GraduationCap, FileCheck, Code } from "lucide-react";
-import Navbar from "../Navbar";
-import Sidebar from "../Sidebar";
-import Footer from "../Footer";
-import Chatbot from "../Chatbot";
+import Navbar from "../../components/Navbar";
+import Sidebar from "../../components/Sidebar";
+import Footer from "../../components/Footer";
+import Chatbot from "../../components/Chatbot";
 
 const HelpPage = () => {
   const [activeTab, setActiveTab] = useState("students");

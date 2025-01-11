@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import Footer from "@/app/Footer";
-import Sidebar from "@/app/Sidebar";
-import Navbar from "@/app/Navbar";
-import ExamStatistics from "../ExamStatistics";
-import TeacherProfileInterface from "../TeacherProfileInterface";
+import Footer from "@/components/Footer";
+import Sidebar from "@/components/Sidebar";
+import Navbar from "@/components/Navbar";
+import ExamStatistics from "@/components/ExamStatistics";
+import TeacherProfileInterface from "@/components/TeacherProfileInterface";
 
 const TeacherProfile = () => {
     const [activeLink, setActiveLink] = useState("Profile");

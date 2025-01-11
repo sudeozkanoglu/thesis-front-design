@@ -12,10 +12,12 @@ import {
 import { Card, CardContent, Button, TextField } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { useRouter } from "next/navigation";
 
 const QuestionBuilder = () => {
   const [examTime, setExamTime] = useState({ hours: 0, minutes: 0 });
   const [examDate, setExamDate] = useState(null);
+  const router = useRouter();
   const [questions, setQuestions] = useState([
     { text: "", answer: "", showAnswer: false },
   ]);
@@ -160,7 +162,7 @@ const QuestionBuilder = () => {
 
           <Button
             onClick={() =>
-              console.log("Questions:", questions, "Time:", examTime, "Date:", examDate)
+              router.push("/lessonView")
             }
             variant="contained"
             color="success"

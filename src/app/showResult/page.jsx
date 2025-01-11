@@ -1,11 +1,11 @@
 "use client"; 
 
 import React from "react";
-import Navbar from "../Navbar";
-import Sidebar from "../Sidebar";
-import ExamResult from "../ExamResult";
-import Footer from "../Footer";
-import ShowResult from "../ShowResult";
+import Navbar from "@/components/Navbar";
+import Sidebar from "@/components/Sidebar";
+import ExamResult from "@/components/ExamResult";
+import Footer from "@/components/Footer";
+import ShowResult from "@/components/ShowResult";
 
 const Results = () => {
     const [activeLink, setActiveLink] = React.useState("Results");

@@ -1,10 +1,10 @@
 "use client";
 import React, { useState } from "react";
 
-import Footer from "../Footer";
-import Sidebar from "../Sidebar";
-import Navbar from "../Navbar";
-import ExamResult from "../ExamResult";
+import Footer from "../../components/Footer";
+import Sidebar from "../../components/Sidebar";
+import Navbar from "../../components/Navbar";
+import ExamResult from "../../components/ExamResult";
 
 const DashboardLayout = () => {
   const [activeLink, setActiveLink] = useState("Profile");

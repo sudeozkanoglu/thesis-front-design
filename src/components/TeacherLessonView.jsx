@@ -9,6 +9,7 @@ import {
   EmojiEvents as Award,
   Description as FileText
 } from '@mui/icons-material';
+import { useRouter } from 'next/navigation';
 
 const TeacherLessonView = () => {
   const lessonContent = {
@@ -84,6 +85,8 @@ const TeacherLessonView = () => {
     const totalStudents = studentResults.reduce((sum, group) => sum + group.count, 0);
     return totalStudents > 0 ? `${totalStudents} students` : "No participants";
   };
+
+  const router = useRouter();
 
   const ExamStatistics = ({ exam }) => {
     if (exam.status !== "completed") return null;
@@ -187,7 +190,7 @@ const TeacherLessonView = () => {
                 {exam.status === "pending" && (
                   <div className='flex justify-center items-center h-full'>
                     <div className="flex justify-center">
-                    <Button size="small" className="bg-blue-500 text-white hover:bg-blue-600 flex justify-center">
+                    <Button size="small" className="bg-blue-500 text-white hover:bg-blue-600 flex justify-center" onClick={() => router.push("/createQuestions")}>
                       <Plus className="w-4 h-4 mr-1" />
                       Take Exam
                     </Button>

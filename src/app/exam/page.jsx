@@ -3,10 +3,10 @@
 import React, { useState } from "react";
 
 import { Card, CardContent } from "@mui/material";
-import Footer from "../Footer";
-import Sidebar from "../Sidebar";
-import Navbar from "../Navbar";
-import ExamResult from "../ExamResult";
+import Footer from "../../components/Footer";
+import Sidebar from "../../components/Sidebar";
+import Navbar from "../../components/Navbar";
+import ExamResult from "../../components/ExamResult";
 import { useRouter } from "next/navigation";
 
 const ExamLayout = () => {
@@ -28,10 +28,10 @@ const ExamLayout = () => {
       id: 1,
       name: "Technical English for Engineers",
       date: "2025-01-11",
-      time: "15:55",
+      time: "23:54",
       isCompleted: false,
       type: "EN-TR",
-      endTime: "15:58",
+      endTime: "23:58",
     },
     {
       id: 2,

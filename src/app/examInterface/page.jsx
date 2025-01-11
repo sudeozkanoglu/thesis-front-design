@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Clock, ChevronLeft, ChevronRight, Check, Square, Video} from 'lucide-react';
-import StaticAudioWaveform from "@/app/StaticAudioWaveform";
+import StaticAudioWaveform from "@/components/StaticAudioWaveform";
 import {useRouter} from "next/navigation";
 
 const AudioExamInterface = () => {

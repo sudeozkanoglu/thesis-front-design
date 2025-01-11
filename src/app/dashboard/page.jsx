@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import Footer from "@/app/Footer";
-import Sidebar from "@/app/Sidebar";
-import Navbar from "@/app/Navbar";
-import ExamResult from "@/app/ExamResult";
-import Calendar from "@/app/Calendar";
+import Footer from "@/components/Footer";
+import Sidebar from "@/components/Sidebar";
+import Navbar from "@/components/Navbar";
+import ExamResult from "@/components/ExamResult";
+import Calendar from "@/components/Calendar";
 
 const DashboardLayout = () => {
   const [activeLink, setActiveLink] = useState("Dashboard");

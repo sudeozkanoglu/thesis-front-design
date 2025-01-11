@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import Footer from "@/app/Footer";
-import Sidebar from "@/app/Sidebar";
-import Navbar from "@/app/Navbar";
-import Calendar from "@/app/Calendar";
-import ExamStatistics from "@/app/ExamStatistics"; 
+import Footer from "@/components/Footer";
+import Sidebar from "@/components/Sidebar";
+import Navbar from "@/components/Navbar";
+import Calendar from "@/components/Calendar";
+import ExamStatistics from "@/components/ExamStatistics"; 
 
 const TeacherDashboard = () => {
   const [activeLink, setActiveLink] = useState("Dashboard");

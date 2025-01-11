@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from 'react';
-import Footer from "@/app/Footer";
-import Sidebar from "@/app/Sidebar";
-import Navbar from "@/app/Navbar";
-import QuestionBuilder from '../QuestionBuilder';
-import ExamStatistics from "@/app/ExamStatistics";
+import Footer from "@/components/Footer";
+import Sidebar from "@/components/Sidebar";
+import Navbar from "@/components/Navbar";
+import QuestionBuilder from '@/components/QuestionBuilder';
+import ExamStatistics from "@/components/ExamStatistics";
 
 const CreateQuestions = () => {
     const [activeLink, setActiveLink] = useState("Exam");

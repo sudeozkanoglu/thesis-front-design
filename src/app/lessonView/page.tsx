@@ -1,11 +1,11 @@
 "use client";
 
 import React, {useState} from "react";
-import Footer from "../Footer";
-import Navbar from "../Navbar";
-import Sidebar from "../Sidebar";
-import ExamStatistics from "../ExamStatistics";
-import TeacherLessonView from "../TeacherLessonView";
+import Footer from "../../components/Footer";
+import Navbar from "../../components/Navbar";
+import Sidebar from "../../components/Sidebar";
+import ExamStatistics from "../../components/ExamStatistics";
+import TeacherLessonView from "../../components/TeacherLessonView";
 
 const LessonView = () => {
     const [activeLink, setActiveLink] = useState("Exam");

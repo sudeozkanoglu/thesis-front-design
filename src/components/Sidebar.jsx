@@ -30,12 +30,18 @@ const Sidebar = ({ activeLink, setActiveLink }) => {
     return basePath;
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem("userType");
+    localStorage.removeItem("token");
+    router.push("/login");
+  };
+
   const links = [
     { icon: Home, text: "Dashboard", href: getHref("/dashboard") },
     { icon: BookOpen, text: "Exams", href: getHref("/exam") },
     { icon: Settings, text: "Profile", href: getHref("/profile") },
     { icon: HelpCircle, text: "Help", href: getHref("/help") },
-    { icon: LogOut, text: "Logout", href: getHref("/logout") },
+    { icon: LogOut, text: "Logout", href: getHref("#") },
   ];
 
   return (
@@ -47,8 +53,13 @@ const Sidebar = ({ activeLink, setActiveLink }) => {
             href="#"
             onClick={(e) => {
               e.preventDefault(); // Varsayılan tıklama davranışını önle
-              setActiveLink(text); // Aktif bağlantıyı ayarla
-              router.push(href); // Yönlendirme yap
+
+              if (text === "Logout") {
+                handleLogout(); // Logout işlemini çağır
+              } else {
+                setActiveLink(text); // Aktif bağlantıyı ayarla
+                router.push(href); // Yönlendirme yap
+              }
             }}
             className={`flex items-center gap-3 px-4 py-2 rounded-md transition-colors ${
               activeLink === text
