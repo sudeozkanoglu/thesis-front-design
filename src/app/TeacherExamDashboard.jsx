@@ -11,12 +11,13 @@ import {
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import BookIcon from "@mui/icons-material/Book";
+import {useRouter} from "next/navigation";
 
 export default function TeacherExamDashboard() {
   const [courses, setCourses] = useState([
     {
       id: 1,
-      name: "Business English",
+      name: "Technical English for Engineers",
       code: "BE101",
       students: 45,
       exams: ["Speaking Assestment A", "Speaking Assestment B", "Speaking Assestment C", "Midterm", "Final"],
@@ -30,7 +31,7 @@ export default function TeacherExamDashboard() {
     },
     {
       id: 3,
-      name: "Technical English for Engineers",
+      name: "Business English",
       code: "TE301",
       students: 28,
       exams: ["Speaking Assestment A", "Speaking Assestment B", "Speaking Assestment C", "Midterm", "Final"],
@@ -57,6 +58,8 @@ export default function TeacherExamDashboard() {
       exams: ["Speaking Assestment A", "Speaking Assestment B", "Speaking Assestment C", "Midterm", "Final"],
     },
   ]);
+
+  const router = useRouter();
 
   return (
     <Container maxWidth="xl" className="py-10">
@@ -121,6 +124,7 @@ export default function TeacherExamDashboard() {
                   size="small"
                   color="secondary"
                   className="w-full bg-gradient-to-r from-indigo-500 to-indigo-700 text-white"
+                  onClick={() => router.push("/lessonView")}
                 >
                   View
                 </Button>

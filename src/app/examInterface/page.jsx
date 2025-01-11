@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Clock, ChevronLeft, ChevronRight, Check, Square, Video} from 'lucide-react';
 import StaticAudioWaveform from "@/app/StaticAudioWaveform";
+import {useRouter} from "next/navigation";
 
 const AudioExamInterface = () => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
@@ -11,6 +12,8 @@ const AudioExamInterface = () => {
   const videoRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const [recordings, setRecordings] = useState({});
+
+  const router = useRouter();
 
   // Örnek sorular (artık audioUrl vs. önemsiz, çünkü statik gösteriyoruz)
   const questions = [
@@ -145,7 +148,7 @@ const AudioExamInterface = () => {
           </button>
 
           {currentQuestion === questions.length - 1 ? (
-            <button className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+            <button className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700" onClick={() => router.push("/exam")}>
               <Check className="w-5 h-5" />
               Submit Exam
             </button>

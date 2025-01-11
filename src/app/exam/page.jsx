@@ -7,11 +7,14 @@ import Footer from "../Footer";
 import Sidebar from "../Sidebar";
 import Navbar from "../Navbar";
 import ExamResult from "../ExamResult";
+import { useRouter } from "next/navigation";
 
 const ExamLayout = () => {
   const [activeLink, setActiveLink] = useState("Exams");
 
   const studentName = "Jennifer Melfi";
+
+  const router = useRouter();
 
   const getInitials = (name) => {
     return name
@@ -24,16 +27,16 @@ const ExamLayout = () => {
     {
       id: 1,
       name: "Technical English for Engineers",
-      date: "2024-12-27",
-      time: "22:02",
+      date: "2025-01-11",
+      time: "15:55",
       isCompleted: false,
       type: "EN-TR",
-      endTime: "22:30",
+      endTime: "15:58",
     },
     {
       id: 2,
       name: "Everyday English Conversation",
-      date: "2025-01-10",
+      date: "2025-02-10",
       time: "22:20",
       isCompleted: false,
       type: "EN-TR",
@@ -133,6 +136,14 @@ const ExamLayout = () => {
                 isButtonDisabled = true;
                 buttonClasses = "bg-gray-400 text-gray-200 cursor-not-allowed";
               }
+
+              const handleButtonClick = () => {
+                if (buttonText === "Show Result") {
+                  router.push("/showResult");
+                } else if (buttonText === "Start Exam") {
+                  router.push("/examInterface");
+                }
+              };
               // Aksi durumda (şu an sınav zamanındaysa) => "Start Exam" (aktif)
 
               return (
@@ -160,6 +171,7 @@ const ExamLayout = () => {
                     <button
                       className={`w-full p-2 rounded-md font-semibold ${buttonClasses}`}
                       disabled={isButtonDisabled}
+                      onClick={handleButtonClick}
                     >
                       {buttonText}
                     </button>

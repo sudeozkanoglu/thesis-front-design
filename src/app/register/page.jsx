@@ -10,11 +10,14 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 
-const LoginPage = () => {
+const RegisterPage = () => {
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
+    userType: "student",
   });
+
   const [showPassword, setShowPassword] = useState(false);
   const [focusedField, setFocusedField] = useState(null);
 
@@ -38,32 +41,21 @@ const LoginPage = () => {
     }
   };
 
-  const redirectToRegister = () => {
-    router.push("/register");
-  };
-  
-  const onLogin = async (event) => {
+  const onRegister = async (event) => {
     event.preventDefault();
-    const newUrl = "http://localhost:4000/api/user/login";
+    const newUrl = "http://localhost:4000/api/user/register";
 
     try {
       const response = await axios.post(newUrl, formData);
 
       if (response.data.success) {
-        localStorage.setItem("token", response.data.token);
-        localStorage.setItem("userType", response.data.userType);
-        if (response.data.userType === "student") {
-          router.push("/dashboard");
-        }
-        else {
-          router.push("/teacherDashboard");
-        }
+        router.push("/login");
       } else {
         alert(response.data.message);
       }
     } catch (error) {
-      console.error("Error during login:", error);
-      alert("An error occurred. Please try again.");
+      console.error("Error during registration:", error);
+      alert("An error occurred.");
     }
   };
 
@@ -100,18 +92,22 @@ const LoginPage = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50">
         <Card className="w-full max-w-md">
           <CardContent>
-            <motion.div initial="hidden" animate="visible" className="space-y-6">
+            <motion.div
+              initial="hidden"
+              animate="visible"
+              className="space-y-6"
+            >
               <motion.div>
                 <Typography
                   variant="h5"
                   className="text-center font-bold text-gray-800 mb-6"
                 >
-                  Welcome Back to TriLingua
+                  Welcome to TriLingua
                 </Typography>
               </motion.div>
 
-              <motion.form className="space-y-6" onSubmit={onLogin}>
-                {["email", "password"].map((field) => (
+              <motion.form className="space-y-6" onSubmit={onRegister}>
+                {["name", "email", "password"].map((field) => (
                   <motion.div className="space-y-2 relative" key={field}>
                     <motion.label
                       animate={{
@@ -135,11 +131,17 @@ const LoginPage = () => {
                     <div className="relative">
                       <Input
                         id={field}
-                        type={field === "password" && !showPassword ? "password" : "text"}
+                        type={
+                          field === "password" && !showPassword
+                            ? "password"
+                            : "text"
+                        }
                         className="w-full pr-10"
                         value={formData[field]}
                         onFocus={() => handleFocus(field)}
-                        onBlur={(e) => handleBlur(field, e.target.value)}
+                        onBlur={(e) =>
+                          handleBlur(field, e.target.value)
+                        }
                         onChange={handleInputChange}
                       />
                       {field === "password" && (
@@ -148,34 +150,30 @@ const LoginPage = () => {
                           onClick={() => setShowPassword(!showPassword)}
                           className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
                         >
-                          {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
                         </button>
                       )}
                     </div>
                   </motion.div>
                 ))}
 
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
                   <Button
                     className="w-full bg-blue-500 text-white hover:bg-blue-600"
                     type="submit"
                   >
-                    Sign in
+                    Sign Up
                   </Button>
                 </motion.div>
               </motion.form>
             </motion.div>
-            <div className="text-center mt-4">
-                <p className="text-gray-600">
-                  Don't have an account?{" "}
-                  <button
-                    className="text-blue-600 hover:underline font-semibold"
-                    onClick={redirectToRegister}
-                  >
-                    Register here
-                  </button>
-                </p>
-              </div>
           </CardContent>
         </Card>
       </div>
@@ -183,4 +181,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default RegisterPage;
