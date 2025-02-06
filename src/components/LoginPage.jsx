@@ -55,8 +55,11 @@ const LoginPage = () => {
         if (response.data.userType === "student") {
           router.push("/dashboard");
         }
-        else {
+        else if (response.data.userType === "teacher") {
           router.push("/teacherDashboard");
+        }
+        else {
+          router.push("/admin");
         }
       } else {
         alert(response.data.message);
