@@ -52,6 +52,7 @@ const LoginPage = () => {
       if (response.data.success) {
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("userType", response.data.userType);
+        localStorage.setItem("userId", response.data.userId);
         if (response.data.userType === "student") {
           router.push("/dashboard");
         }

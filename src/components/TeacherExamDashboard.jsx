@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -7,59 +7,62 @@ import {
   Box,
   Chip,
   Container,
+  CircularProgress,
   Divider,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import BookIcon from "@mui/icons-material/Book";
 import {useRouter} from "next/navigation";
 
-export default function TeacherExamDashboard() {
-  const [courses, setCourses] = useState([
-    {
-      id: 1,
-      name: "Technical English for Engineers",
-      code: "BE101",
-      students: 45,
-      exams: ["Speaking Assestment A", "Speaking Assestment B", "Speaking Assestment C", "Midterm", "Final"],
-    },
-    {
-      id: 2,
-      name: "Legal English",
-      code: "LE202",
-      students: 32,
-      exams: ["Speaking Assestment A", "Speaking Assestment B", "Speaking Assestment C", "Midterm", "Final"],
-    },
-    {
-      id: 3,
-      name: "Business English",
-      code: "TE301",
-      students: 28,
-      exams: ["Speaking Assestment A", "Speaking Assestment B", "Speaking Assestment C", "Midterm", "Final"],
-    },
-    {
-      id: 4,
-      name: "English for Tourism and Hospitality",
-      code: "ETH101",
-      students: 45,
-      exams: ["Speaking Assestment A", "Speaking Assestment B", "Speaking Assestment C", "Midterm", "Final"],
-    },
-    {
-      id: 5,
-      name: "Medical English",
-      code: "ME202",
-      students: 32,
-      exams: ["Speaking Assestment A", "Speaking Assestment B", "Speaking Assestment C", "Midterm", "Final"],
-    },
-    {
-      id: 6,
-      name: "Everyday English Conversation",
-      code: "EEC301",
-      students: 28,
-      exams: ["Speaking Assestment A", "Speaking Assestment B", "Speaking Assestment C", "Midterm", "Final"],
-    },
-  ]);
+export default function TeacherExamDashboard({userId}) {
+  const [teacher, setTeacher] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const router = useRouter();
+  
+  const [courses, setCourses] = useState([]);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:4000/api/teacher/user/${userId}`
+        );
+        const data = await response.json();
+
+        if (data.success) {
+          setTeacher(data.teacher);
+          setCourses(data.teacher.courses);
+        } else {
+          setError("No courses found.");
+        }
+      } catch (err) {
+        console.error("Error fetching courses:", err);
+        setError("Failed to fetch courses.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCourses();
+  }, [userId]);
+
+  if (loading) {
+    return (
+      <Box className="flex justify-center items-center h-40">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Typography variant="h6" color="error" align="center">
+        {error}
+      </Typography>
+    );
+  }
 
   return (
     <Container maxWidth="xl" className="py-10">
@@ -81,15 +84,15 @@ export default function TeacherExamDashboard() {
 
       {/* Courses Section */}
       <Box className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {courses.map((course) => (
+        {courses?.map((course) => (
           <Card
-            key={course.id}
+            key={course._id}
             className="shadow-lg hover:shadow-2xl transition-transform duration-300 hover:-translate-y-2 bg-slate-50"
           >
             <CardContent>
               <Box className="mb-6 text-center">
                 <Chip
-                  label={course.code}
+                  label={course.courseCode}
                   size="small"
                   className="mb-2 bg-indigo-100 text-indigo-600"
                 />
@@ -97,7 +100,7 @@ export default function TeacherExamDashboard() {
                   variant="h6"
                   className="font-medium text-gray-800"
                 >
-                  {course.name}
+                  {course.courseName}
                 </Typography>
               </Box>
 
@@ -107,7 +110,7 @@ export default function TeacherExamDashboard() {
                 <Box className="flex items-center gap-2">
                   <PersonIcon fontSize="small" className="text-indigo-600" />
                   <Typography variant="body2" className="text-gray-600">
-                    {course.students} Students
+                    {course.students ? course.students : 0} Students
                   </Typography>
                 </Box>
                 <Box className="flex items-center gap-2">

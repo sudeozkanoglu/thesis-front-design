@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
@@ -9,6 +9,14 @@ import TeacherExamDashboard from "@/components/TeacherExamDashboard";
 
 const TeacherExamLayout = () => {
   const [activeLink, setActiveLink] = useState("Exams");
+  const [userId, setUserId] = useState(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") { 
+      const storedUserId = localStorage.getItem("userId");
+      setUserId(storedUserId);
+    }
+  }, []);
 
   return (
         <div className="min-h-screen bg-slate-100">
@@ -22,7 +30,7 @@ const TeacherExamLayout = () => {
 
             {/* Right Column */}
             <div className="flex-1 bg-white rounded-lg shadow-md p-6">
-            <TeacherExamDashboard />
+            {userId && <TeacherExamDashboard userId={userId} />}
             </div>
         </div>
         <Footer />

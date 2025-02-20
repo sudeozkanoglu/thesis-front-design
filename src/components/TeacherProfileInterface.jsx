@@ -1,5 +1,11 @@
-import React from "react";
-import { Card, CardContent, Typography, Badge } from "@mui/material";
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  Typography,
+  Badge,
+  CircularProgress,
+} from "@mui/material";
 import {
   Calendar,
   Mail,
@@ -13,43 +19,51 @@ import {
 } from "lucide-react";
 import Avatar from "@mui/material/Avatar";
 
-const TeacherProfileInterface = () => {
-  const teacher = {
-    name: "Dr. Sarah Johnson",
-    image: "/images/teacher.jpeg",
-    title: "Senior English Professor",
-    department: "Department of English",
-    email: "sarah.johnson@university.edu",
-    phone: "(555) 123-4567",
-    office: "Building A, Room 204",
-    expertise: [
-      "Language Acquisition",
-      "Translation",
-      "Phonetics",
-      "Advanced Linguistic Analysis",
-      "Pronunciation",
-      "Teaching Methodologies",
-    ],
-    education: [
-      "Ph.D. in English Linguistics, Stanford University",
-      "M.A. in Applied Linguistics, University of Cambridge",
-      "B.A. in English Literature, UC Berkeley",
-    ],
-    officeHours: [
-      "Monday: 10:00 AM - 12:00 PM",
-      "Tuesday: 2:00 PM - 4:00 PM",
-      "Thursday: 1:00 PM - 3:00 PM",
-    ],
-    currentCourses: [
-      "Business English",
-      "Legal English",
-      "Technical English for Engineers",
-      "English for Tourism and Hospitality",
-      "Medical English",
-      "Everyday English Conversation"
-    ],
-  };
+const TeacherProfileInterface = ({ userId }) => {
+  const [teacher, setTeacher] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
+  useEffect(() => {
+    const fetchTeacher = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:4000/api/teacher/user/${userId}`
+        );
+        const data = await response.json();
+        if (data.success) {
+          setTeacher(data.teacher);
+        } else {
+          setError("Teacher not found");
+        }
+      } catch (err) {
+        setError("Error fetching teacher data");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (userId) {
+      fetchTeacher();
+    }
+  }, [userId]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <CircularProgress />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Typography variant="h6" color="error" align="center">
+        {error}
+      </Typography>
+    );
+  }
   const InfoItem = ({ icon: Icon, children }) => (
     <div className="flex items-center gap-2 text- text-gray-800">
       <Icon className="w-5 h-5 text-green-600" />
@@ -62,8 +76,24 @@ const TeacherProfileInterface = () => {
       {/* Header Section */}
       <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-8 shadow-lg">
         <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-          <Avatar className="w-32 h-32 border-4 border-white shadow-lg">
-            <img src={teacher.image} alt={teacher.name} />
+          <Avatar
+            sx={{
+              width: 150,
+              height: 150,
+              border: "4px solid white",
+              boxShadow: 3,
+            }}
+          >
+            <img
+              src={teacher.photo || "/images/default-teacher.jpg"}
+              alt={teacher.firstName}
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                borderRadius: "50%",
+              }}
+            />
           </Avatar>
           <div className="text-center md:text-left space-y-2">
             <Typography
@@ -72,10 +102,10 @@ const TeacherProfileInterface = () => {
               color="textPrimary"
               className="font-bold"
             >
-              {teacher.name}
+              {teacher.firstName} {teacher.lastName}
             </Typography>
             <Typography variant="h6" color="textSecondary">
-              {teacher.title}
+              {teacher.degreeLevel}
             </Typography>
             <div className="flex items-center gap-2 justify-center md:justify-start">
               <Building2 className="w-5 h-5 text-gray-600" />
@@ -97,8 +127,8 @@ const TeacherProfileInterface = () => {
           </div>
           <CardContent className="space-y-7 ">
             <InfoItem icon={Mail}>{teacher.email}</InfoItem>
-            <InfoItem icon={Phone}>{teacher.phone}</InfoItem>
-            <InfoItem icon={MapPin}>{teacher.office}</InfoItem>
+            <InfoItem icon={Phone}>{teacher.phoneNumber}</InfoItem>
+            <InfoItem icon={MapPin}>{teacher.roomNumber}</InfoItem>
           </CardContent>
         </Card>
 
@@ -112,23 +142,22 @@ const TeacherProfileInterface = () => {
           </div>
           <CardContent>
             <div className="flex flex-wrap gap-2">
-              {teacher.expertise.map((skill, index) => (
+              {teacher.expertiseAreas.map((skill, index) => (
                 <Badge
-                  key={skill}
+                  key={skill} // Eğer `skill` string ise, doğrudan `key` olarak kullanılabilir.
                   variant="filled"
                   className={`text-white font-semibold py-2 px-4 rounded-lg shadow-md transform transition-all duration-300 
-            ${
-              index % 4 === 0
-                ? "bg-blue-600 hover:bg-blue-700"
-                : index % 4 === 1
-                ? "bg-green-600 hover:bg-green-700"
-                : index % 4 === 2
-                ? "bg-purple-600 hover:bg-purple-700"
-                : "bg-yellow-600 hover:bg-yellow-700"
-            } 
-            hover:scale-105`}
+        ${
+          [
+            "bg-blue-600 hover:bg-blue-700",
+            "bg-green-600 hover:bg-green-700",
+            "bg-purple-600 hover:bg-purple-700",
+            "bg-yellow-600 hover:bg-yellow-700",
+          ][index % 4]
+        } hover:scale-105`}
                 >
-                  {skill}
+                  {skill}{" "}
+                  {/* Eğer `skill` zaten bir string ise, doğrudan yazdır */}
                 </Badge>
               ))}
             </div>
@@ -148,15 +177,29 @@ const TeacherProfileInterface = () => {
           </div>
           <CardContent>
             <div className="space-y-3">
-              {teacher.currentCourses.map((course) => (
-                <div
-                  key={course}
-                  className="flex items-start gap-2 p-2 rounded-md hover:bg-gray-200"
-                >
-                  <BookOpen className="w-5 h-5 text-blue-500 mt-1" />
-                  <span className="text-medium text-gray-600">{course}</span>
+              {teacher.courses.length > 0 ? (
+                <div className="space-y-3">
+                  {teacher.courses.map((course) => (
+                    <div
+                      key={course.courseCode}
+                      className="flex items-start gap-2 p-2 rounded-md hover:bg-gray-200"
+                    >
+                      <BookOpen className="w-5 h-5 text-blue-500 mt-1" />
+                      <span className="text-medium text-gray-600">
+                         {course.courseCode} - {course.courseName}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  align="center"
+                >
+                  No courses assigned.
+                </Typography>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -171,17 +214,29 @@ const TeacherProfileInterface = () => {
           </div>
           <CardContent>
             <div className="space-y-3">
-              {teacher.officeHours.map((hours) => (
-                <div
-                  key={hours}
-                  className="flex items-start gap-2 p-2 rounded-md hover:bg-gray-200"
-                >
-                  <Calendar className="w-5 h-5 text-red-600 mt-1" />
-                  <span className="text-medium text-gray-600 mt-1">
-                    {hours}
-                  </span>
+              {teacher.officeHours.length > 0 ? (
+                <div className="space-y-3">
+                  {teacher.officeHours.map((hours) => (
+                    <div
+                      key={`${hours.day}-${hours.startTime}`}
+                      className="flex items-start gap-2 p-2 rounded-md hover:bg-gray-200"
+                    >
+                      <Calendar className="w-5 h-5 text-red-600 mt-1" />
+                      <span className="text-medium text-gray-600 mt-1">
+                        {hours.day}: {hours.startTime} - {hours.endTime}
+                      </span>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <Typography
+                  variant="body2"
+                  color="textSecondary"
+                  align="center"
+                >
+                  No office hours set.
+                </Typography>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -198,13 +253,15 @@ const TeacherProfileInterface = () => {
         </div>
         <CardContent>
           <div className="space-y-3">
-            {teacher.education.map((edu) => (
+            {teacher.schools.map((edu) => (
               <div
-                key={edu}
+                key={`${edu.degree}-${edu.name}`}
                 className="flex items-start gap-2 p-2 rounded-md hover:bg-gray-200"
               >
                 <Award className="w-5 h-5 text-yellow-700 mt-1" />
-                <span className="text-medium text-gray-600">{edu}</span>
+                <span className="text-medium text-gray-600">
+                  {edu.degree} - {edu.name}
+                </span>
               </div>
             ))}
           </div>

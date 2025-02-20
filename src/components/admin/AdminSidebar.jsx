@@ -11,7 +11,14 @@ const AdminSidebar = ({activeSection, setActiveSection}) => {
     { id: "teacher-settings", label: "Teacher Settings", path: "/admin/listTeacher" },
     { id: "student-settings", label: "Student Settings", path: "/admin/students" },
     { id: "course-settings", label: "Course Settings", path: "/admin/listCourse" },
+    { id: "logout", label: "Logout", path: "/" },
   ];
+
+  const handleLogout = () => {
+    localStorage.removeItem("userType");
+    localStorage.removeItem("token");
+    router.push("/login");
+  };
 
   const handleNavigation = (id, path) => {
     setActiveSection(id); // Aktif bölümü güncelle
@@ -25,7 +32,12 @@ const AdminSidebar = ({activeSection, setActiveSection}) => {
         {menuItems.map((item) => (
           <button
             key={item.id}
-            onClick={() => handleNavigation(item.id, item.path)}
+            onClick={() => {
+              if (item.id === "logout") {
+                handleLogout();
+              } else {
+                handleNavigation(item.id, item.path);
+              }}}
             className={`w-full text-left p-3 rounded transition duration-200 ${
               activeSection === item.id
                 ? "bg-blue-500 text-white"
