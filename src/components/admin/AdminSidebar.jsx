@@ -2,15 +2,27 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation"; // Next.js yönlendirme
 
-const AdminSidebar = ({activeSection, setActiveSection}) => {
+const AdminSidebar = ({ activeSection, setActiveSection }) => {
   const router = useRouter();
 
   // Menü Öğeleri ve Yönlendirme URL'leri
   const menuItems = [
     { id: "dashboard", label: "Dashboard", path: "/admin" },
-    { id: "teacher-settings", label: "Teacher Settings", path: "/admin/listTeacher" },
-    { id: "student-settings", label: "Student Settings", path: "/admin/students" },
-    { id: "course-settings", label: "Course Settings", path: "/admin/listCourse" },
+    {
+      id: "teacher-settings",
+      label: "Teacher Settings",
+      path: "/admin/listTeacher",
+    },
+    {
+      id: "student-settings",
+      label: "Student Settings",
+      path: "/admin/listStudent",
+    },
+    {
+      id: "course-settings",
+      label: "Course Settings",
+      path: "/admin/listCourse",
+    },
     { id: "logout", label: "Logout", path: "/" },
   ];
 
@@ -37,7 +49,8 @@ const AdminSidebar = ({activeSection, setActiveSection}) => {
                 handleLogout();
               } else {
                 handleNavigation(item.id, item.path);
-              }}}
+              }
+            }}
             className={`w-full text-left p-3 rounded transition duration-200 ${
               activeSection === item.id
                 ? "bg-blue-500 text-white"

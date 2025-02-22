@@ -28,7 +28,7 @@ const TeacherProfileInterface = ({ userId }) => {
     const fetchTeacher = async () => {
       try {
         const response = await fetch(
-          `http://localhost:4000/api/teacher/user/${userId}`
+          `http://localhost:4000/api/teacher/${userId}`
         );
         const data = await response.json();
         if (data.success) {
@@ -82,18 +82,13 @@ const TeacherProfileInterface = ({ userId }) => {
               height: 150,
               border: "4px solid white",
               boxShadow: 3,
+              bgcolor: "primary.main",
+              fontSize: 50,
             }}
           >
-            <img
-              src={teacher.photo || "/images/default-teacher.jpg"}
-              alt={teacher.firstName}
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-                borderRadius: "50%",
-              }}
-            />
+            {`${teacher.firstName?.charAt(0) ?? ""}${
+              teacher.lastName?.charAt(0) ?? ""
+            }`}
           </Avatar>
           <div className="text-center md:text-left space-y-2">
             <Typography
@@ -186,7 +181,7 @@ const TeacherProfileInterface = ({ userId }) => {
                     >
                       <BookOpen className="w-5 h-5 text-blue-500 mt-1" />
                       <span className="text-medium text-gray-600">
-                         {course.courseCode} - {course.courseName}
+                        {course.courseCode} - {course.courseName}
                       </span>
                     </div>
                   ))}

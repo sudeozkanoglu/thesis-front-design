@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Card,
@@ -8,21 +8,26 @@ import {
   TextField,
   Button,
   Alert,
-  IconButton,
   Stack,
-  Typography,
-  Divider
 } from "@mui/material";
-import { Delete, AddCircle } from "@mui/icons-material";
 
-const AddCourseForm = ({ onClose }) => {
+const AddCourseForm = ({ existingCourse, onClose }) => {
   const router = useRouter();
   const [formData, setFormData] = useState({
     courseName: "",
     courseCode: "",
     description: "",
-    exams: [""],
   });
+
+  useEffect(() => {
+    if (existingCourse) {
+      setFormData({
+        courseName: existingCourse.courseName,
+        courseCode: existingCourse.courseCode,
+        description: existingCourse.description,
+      });
+    }
+  }, [existingCourse]);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -35,35 +40,16 @@ const AddCourseForm = ({ onClose }) => {
     }));
   };
 
-  const addExam = () => {
-    setFormData((prev) => ({
-      ...prev,
-      exams: [...prev.exams, ""], 
-    }));
-  };
-
-  const updateExam = (index, value) => {
-    const newExams = [...formData.exams];
-    newExams[index] = value;
-    setFormData((prev) => ({
-      ...prev,
-      exams: newExams,
-    }));
-  };
-
-  const removeExam = (index) => {
-    const newExams = [...formData.exams];
-    newExams.splice(index, 1);
-    setFormData((prev) => ({
-      ...prev,
-      exams: newExams,
-    }));
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess(false);
+
+    const url = existingCourse
+      ? `http://localhost:4000/api/courses/${existingCourse._id}`
+      : "http://localhost:4000/api/courses/add";
+
+    const method = existingCourse ? "PUT" : "POST";
 
     if (!formData.courseName || !formData.courseCode) {
       setError("Please fill in all required fields");
@@ -71,15 +57,19 @@ const AddCourseForm = ({ onClose }) => {
     }
 
     try {
-      const response = await fetch("http://localhost:4000/api/courses/add", {
-        method: "POST",
+      const response = await fetch(url, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
 
       const data = await response.json();
       if (data.success) {
-        setSuccess(true);
+        setSuccess(
+          existingCourse
+            ? "Course updated successfully!"
+            : "Course added successfully!"
+        );
         setTimeout(() => {
           onClose(); // Modal'ı kapat
           router.push("/admin/listCourse");
@@ -93,7 +83,9 @@ const AddCourseForm = ({ onClose }) => {
   };
 
   return (
-    <Card sx={{ maxWidth: 700, margin: "auto", boxShadow: 6, borderRadius: "12px" }}>
+    <Card
+      sx={{ maxWidth: 700, margin: "auto", boxShadow: 6, borderRadius: "12px" }}
+    >
       <CardHeader
         title="Add New Course"
         sx={{
@@ -140,41 +132,11 @@ const AddCourseForm = ({ onClose }) => {
               rows={3}
             />
 
-            {/* Exams Section */}
-            <Divider />
-            <Typography variant="h6" color="primary">
-              Exams
-            </Typography>
-
-            {formData.exams.map((exam, index) => (
-              <Stack key={index} direction="row" spacing={2} alignItems="center">
-                <TextField
-                  fullWidth
-                  label={`Exam ${index + 1}`}
-                  value={exam}
-                  onChange={(e) => updateExam(index, e.target.value)}
-                  variant="outlined"
-                />
-                <IconButton color="error" onClick={() => removeExam(index)}>
-                  <Delete />
-                </IconButton>
-              </Stack>
-            ))}
-
-            <Button
-              type="button"
-              variant="contained"
-              color="primary"
-              startIcon={<AddCircle />}
-              onClick={addExam}
-              sx={{ textTransform: "none", borderRadius: "8px" }}
-            >
-              Add Exam
-            </Button>
-
             {/* Error & Success Messages */}
             {error && <Alert severity="error">{error}</Alert>}
-            {success && <Alert severity="success">Course added successfully!</Alert>}
+            {success && (
+              <Alert severity="success">Course added successfully!</Alert>
+            )}
 
             {/* Submit & Cancel Buttons */}
             <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>

@@ -12,10 +12,11 @@ import { useRouter } from "next/navigation";
 
 const RegisterPage = () => {
   const [formData, setFormData] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
-    userType: "student",
+    userType: "Student",
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -111,7 +112,7 @@ const RegisterPage = () => {
               </motion.div>
 
               <motion.form className="space-y-6" onSubmit={onRegister}>
-                {["name", "email", "password"].map((field) => (
+                {["firstName", "lastName", "email", "password"].map((field) => (
                   <motion.div className="space-y-2 relative" key={field}>
                     <motion.label
                       animate={{

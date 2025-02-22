@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import PropTypes from "prop-types";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Avatar } from "@mui/material";
 
 function Calendar({ calendarData, personData }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
@@ -30,13 +31,6 @@ function Calendar({ calendarData, personData }) {
     });
   };
 
-  const getInitials = (personName) => {
-    return personName
-      .split(" ")
-      .map((n) => n[0])
-      .join("");
-  };
-
   const daysInMonth = new Date(
     currentMonth.getFullYear(),
     currentMonth.getMonth() + 1,
@@ -49,15 +43,10 @@ function Calendar({ calendarData, personData }) {
     for (let day = 1; day <= daysInMonth; day++) {
       const exam = calendarData.find((e) => e.date === day);
       days.push(
-        <div
-          key={day}
-          className="h-24 border rounded-lg p-2"
-        >
+        <div key={day} className="h-24 border rounded-lg p-2">
           <div className="text-sm text-black mb-1">{day}</div>
           {exam && (
-            <div
-              className={`p-2 rounded-md text-xs ${exam.color}`}
-            >
+            <div className={`p-2 rounded-md text-xs ${exam.color}`}>
               <div className="font-semibold flex justify-between items-center w-full">
                 <span>{exam.subject}</span>
                 <span
@@ -87,10 +76,21 @@ function Calendar({ calendarData, personData }) {
       {/* Calendar Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold">
-            {getInitials(personData.personName)}
-          </div>
-          <h2 className="text-lg font-semibold text-slate-800">{personData.personName}</h2>
+          <Avatar
+            sx={{
+              width: 50,
+              height: 50,
+              bgcolor: "primary.main",
+              fontSize: 24,
+            }}
+          >
+            {`${personData.firstName?.charAt(0) ?? ""}${
+              personData.lastName?.charAt(0) ?? ""
+            }`}
+          </Avatar>
+          <h2 className="text-lg font-semibold text-slate-800">
+            {personData.firstName} {personData.lastName}
+          </h2>
         </div>
         <div className="flex items-center gap-4">
           <button

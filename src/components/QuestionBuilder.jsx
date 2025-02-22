@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Trash2,
   Plus,
@@ -12,12 +13,12 @@ import {
 import { Card, CardContent, Button, TextField } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
-import { useRouter } from "next/navigation";
 
-const QuestionBuilder = () => {
-  const [examTime, setExamTime] = useState({ hours: 0, minutes: 0 });
-  const [examDate, setExamDate] = useState(null);
+const QuestionBuilder = ({ examId }) => {
   const router = useRouter();
+  const [examTime, setExamTime] = useState({ hours: 0, minutes: 0 });
+  const [loading, setLoading] = useState(false);
+  const [examDate, setExamDate] = useState(null);
   const [questions, setQuestions] = useState([
     { text: "", answer: "", showAnswer: false },
   ]);
@@ -41,6 +42,87 @@ const QuestionBuilder = () => {
     const newQuestions = [...questions];
     newQuestions[index].showAnswer = !newQuestions[index].showAnswer;
     setQuestions(newQuestions);
+  };
+
+  const handleSubmit = async () => {
+    if (!examId) {
+      alert("Exam ID is required");
+      return;
+    }
+
+    if (!examDate || (examTime.hours === 0 && examTime.minutes === 0)) {
+      alert("Exam date and duration are required.");
+      return;
+    }
+
+    const questionData = questions.map((item) => ({
+      questionText: item.text,
+      correctAnswer: item.answer,
+      explanation: "",
+    }));
+
+    if (questionData.some((q) => !q.questionText || !q.correctAnswer)) {
+      alert("All questions must have text and an answer.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Step 1: Add questions to the database
+      const questionResponse = await fetch(
+        "http://localhost:4000/api/questions/add",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            exam: examId,
+            questions: questionData,
+          }),
+        }
+      );
+
+      const questionResult = await questionResponse.json();
+
+      if (!questionResult.success) {
+        alert(`Error adding questions: ${questionResult.message}`);
+        return;
+      }
+
+      const addedQuestionIds = questionResult.questions.map((q) => q._id);
+
+      // Step 2: Update the exam with the new date, duration, and question IDs
+      const examUpdateResponse = await fetch(
+        `http://localhost:4000/api/exams/${examId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            examDate: examDate,
+            duration: examTime.hours * 60 + examTime.minutes, // Convert to total minutes
+            questions: addedQuestionIds,
+          }),
+        }
+      );
+
+      const examUpdateResult = await examUpdateResponse.json();
+
+      if (examUpdateResult.success) {
+        alert("Exam and questions updated successfully.");
+        router.push(`/lessonView/${examId}`);
+      } else {
+        alert(`Error updating exam: ${examUpdateResult.message}`);
+      }
+    } catch (error) {
+      console.error("Error submitting data:", error);
+      alert("An error occurred while submitting.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -161,15 +243,14 @@ const QuestionBuilder = () => {
           </Button>
 
           <Button
-            onClick={() =>
-              router.push("/lessonView")
-            }
+            onClick={handleSubmit}
             variant="contained"
             color="success"
             className="flex items-center gap-2"
+            disabled={loading}
           >
             <CheckCheck className="h-4 w-4" />
-            Complete Adding Questions
+            {loading ? "Submitting..." : "Complete Adding Questions"}
           </Button>
         </div>
       </div>

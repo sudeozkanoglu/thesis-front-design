@@ -30,7 +30,6 @@ export default function TeacherDashboard() {
       <div className="flex-1 p-6 bg-gray-100 overflow-y-auto">
           <div>
             <div className="flex justify-between items-center mb-4">
-              <h1 className="text-2xl font-bold text-black">Teacher Settings</h1>
               <button
                 onClick={handleAddTeacher}
                 className="bg-green-700 text-white px-4 py-2 rounded hover:bg-green-800"

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-export default function TeacherKnowledgeForm() {
+export default function TeacherKnowledgeForm({ existingTeacher, onClose }) {
   const router = useRouter();
   const [courses, setCourses] = useState([]);
   const [formData, setFormData] = useState({
@@ -11,7 +11,6 @@ export default function TeacherKnowledgeForm() {
     lastName: "",
     degreeLevel: "",
     department: "",
-    photo: null,
 
     // Part 2: Contact Information
     phoneNumber: "",
@@ -20,7 +19,7 @@ export default function TeacherKnowledgeForm() {
     roomNumber: "",
 
     // Part 3: Educational Background
-    schools: [{ name: "", degree: ""}],
+    schools: [{ name: "", degree: "" }],
 
     // Part 4: Areas of Expertise
     expertiseAreas: [""],
@@ -33,12 +32,33 @@ export default function TeacherKnowledgeForm() {
   });
 
   useEffect(() => {
+    if (existingTeacher) {
+      setFormData({
+        ...existingTeacher,
+      });
+    }
+  }, [existingTeacher]);
+
+  useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await fetch("http://localhost:4000/api/courses"); // Backend URL
+        const response = await fetch("http://localhost:4000/api/courses");
         const data = await response.json();
+
         if (data.success) {
-          setCourses(data.courses); // Veritabanından gelen dersleri state'e kaydet
+          setCourses(data.courses);
+
+          // 🔑 Eğer öğretmenin mevcut dersleri varsa bunları eşle
+          if (existingTeacher && existingTeacher.courses.length > 0) {
+            const matchedCourses = data.courses.filter((course) =>
+              existingTeacher.courses.includes(course._id)
+            );
+
+            setFormData((prev) => ({
+              ...prev,
+              courses: matchedCourses,
+            }));
+          }
         }
       } catch (error) {
         console.error("Error fetching courses:", error);
@@ -46,68 +66,12 @@ export default function TeacherKnowledgeForm() {
     };
 
     fetchCourses();
-  }, []);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  const handlePhotoUpload = (e) => {
-    const file = e.target.files[0];
-
-    if (file) {
-        setFormData((prev) => ({
-            ...prev,
-            photo: file,
-        }));
-    }
-};
-
-  const addCourse = () => {
-    setFormData((prev) => ({
-      ...prev,
-      courses: [
-        ...prev.courses,
-        { courseName: "", courseCode: "", exams: [""] },
-      ],
-    }));
-  };
-
-  const updateCourse = (index, field, value) => {
-    const newCourses = [...formData.courses];
-    newCourses[index][field] = value;
-    setFormData((prev) => ({
-      ...prev,
-      courses: newCourses,
-    }));
-  };
-
-  const addExamToCourse = (courseIndex) => {
-    const newCourses = [...formData.courses];
-    newCourses[courseIndex].exams.push("");
-    setFormData((prev) => ({
-      ...prev,
-      courses: newCourses,
-    }));
-  };
-
-  const updateExam = (courseIndex, examIndex, value) => {
-    const newCourses = [...formData.courses];
-    newCourses[courseIndex].exams[examIndex] = value;
-    setFormData((prev) => ({
-      ...prev,
-      courses: newCourses,
-    }));
-  };
+  }, [existingTeacher]);
 
   const addSchool = () => {
     setFormData((prev) => ({
       ...prev,
-      schools: [...prev.schools, { name: "", degree: ""}],
+      schools: [...prev.schools, { name: "", degree: "" }],
     }));
   };
 
@@ -159,7 +123,9 @@ export default function TeacherKnowledgeForm() {
     const selectedCourseId = e.target.value;
 
     if (!formData.courses.some((course) => course._id === selectedCourseId)) {
-      const selectedCourse = courses.find((course) => course._id === selectedCourseId);
+      const selectedCourse = courses.find(
+        (course) => course._id === selectedCourseId
+      );
       setFormData((prev) => ({
         ...prev,
         courses: [...prev.courses, selectedCourse], // Seçilen dersi ekle
@@ -175,30 +141,32 @@ export default function TeacherKnowledgeForm() {
     }));
   };
 
-
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    const formDataToSend = new FormData();
-    Object.keys(formData).forEach((key) => {
-      if (["schools", "expertiseAreas", "officeHours", "courses"].includes(key)) {
-        formDataToSend.append(key, JSON.stringify(formData[key])); // JSON olarak gönder
-      } else {
-        formDataToSend.append(key, formData[key]);
-      }
-    });
+    const url = existingTeacher
+      ? `http://localhost:4000/api/teacher/${existingTeacher._id}`
+      : "http://localhost:4000/api/teacher/add";
   
     try {
-      const response = await fetch("http://localhost:4000/api/teacher/add", {
-        method: "POST",
-        body: formDataToSend,
+      const response = await fetch(url, {
+        method: existingTeacher ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData), // FormData yerine JSON gönder
       });
   
       const data = await response.json();
   
       if (data.success) {
-        alert("Teacher added successfully!");
-        router.push('/admin/listTeacher');
+        alert(
+          existingTeacher
+            ? "Teacher updated successfully!"
+            : "Teacher added successfully!"
+        );
+        onClose();
+        router.refresh();
       } else {
         alert(`Error: ${data.message}`);
       }
@@ -226,7 +194,9 @@ export default function TeacherKnowledgeForm() {
                 type="text"
                 name="firstName"
                 value={formData.firstName}
-                onChange={handleChange}
+                onChange={(e) =>
+                  setFormData({ ...formData, firstName: e.target.value })
+                }
                 className="w-full p-2 border rounded"
                 placeholder="Laura"
                 required
@@ -238,7 +208,9 @@ export default function TeacherKnowledgeForm() {
                 type="text"
                 name="lastName"
                 value={formData.lastName}
-                onChange={handleChange}
+                onChange={(e) =>
+                  setFormData({ ...formData, lastName: e.target.value })
+                }
                 className="w-full p-2 border rounded"
                 placeholder="Smith"
                 required
@@ -250,7 +222,9 @@ export default function TeacherKnowledgeForm() {
                 type="text"
                 name="degreeLevel"
                 value={formData.degreeLevel}
-                onChange={handleChange}
+                onChange={(e) =>
+                  setFormData({ ...formData, degreeLevel: e.target.value })
+                }
                 className="w-full p-2 border rounded"
                 placeholder="Senior English Teacher"
                 required
@@ -262,27 +236,13 @@ export default function TeacherKnowledgeForm() {
                 type="text"
                 name="department"
                 value={formData.department}
-                onChange={handleChange}
+                onChange={(e) =>
+                  setFormData({ ...formData, department: e.target.value })
+                }
                 className="w-full p-2 border rounded"
                 placeholder="English Department"
                 required
               />
-            </div>
-            <div>
-              <label className="block mb-2 font-bold">Profile Photo</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoUpload}
-                className="w-full p-2 border rounded"
-              />
-              {formData.photo && (
-                <img
-                  src={formData.photo}
-                  alt="Profile"
-                  className="mt-2 w-32 h-32 object-cover rounded"
-                />
-              )}
             </div>
           </div>
         </div>
@@ -299,7 +259,9 @@ export default function TeacherKnowledgeForm() {
                 type="tel"
                 name="phoneNumber"
                 value={formData.phoneNumber}
-                onChange={handleChange}
+                onChange={(e) =>
+                  setFormData({ ...formData, phoneNumber: e.target.value })
+                }
                 className="w-full p-2 border rounded"
                 placeholder="(555) 555-5555"
                 required
@@ -311,7 +273,9 @@ export default function TeacherKnowledgeForm() {
                 type="email"
                 name="email"
                 value={formData.email}
-                onChange={handleChange}
+                onChange={(e) =>
+                  setFormData({ ...formData, email: e.target.value })
+                }
                 className="w-full p-2 border rounded"
                 placeholder="example@hotmail.com"
                 required
@@ -323,7 +287,9 @@ export default function TeacherKnowledgeForm() {
                 type="password"
                 name="password"
                 value={formData.password}
-                onChange={handleChange}
+                onChange={(e) =>
+                  setFormData({ ...formData, password: e.target.value })
+                }
                 className="w-full p-2 border rounded"
                 placeholder="********"
                 required
@@ -335,7 +301,9 @@ export default function TeacherKnowledgeForm() {
                 type="text"
                 name="roomNumber"
                 value={formData.roomNumber}
-                onChange={handleChange}
+                onChange={(e) =>
+                  setFormData({ ...formData, roomNumber: e.target.value })
+                }
                 placeholder="Room 101"
                 className="w-full p-2 border rounded"
               />
@@ -349,7 +317,10 @@ export default function TeacherKnowledgeForm() {
             Educational Background
           </h2>
           {formData.schools.map((school, index) => (
-            <div key={index} className="grid grid-cols-2 gap-4 mb-4">
+            <div
+              key={`school-${index}`}
+              className="grid grid-cols-2 gap-4 mb-4"
+            >
               <div>
                 <label className="block mb-2 font-bold">School Name</label>
                 <input
@@ -389,7 +360,7 @@ export default function TeacherKnowledgeForm() {
             Areas of Expertise
           </h2>
           {formData.expertiseAreas.map((area, index) => (
-            <div key={index} className="mb-4">
+            <div key={`expertise-${index}`} className="mb-4">
               <label className="block mb-2 font-bold">Expertise Area</label>
               <input
                 type="text"
@@ -411,8 +382,13 @@ export default function TeacherKnowledgeForm() {
 
         {/* Part 5: Current Courses */}
         <div className="border-b pb-4">
-          <h2 className="text-xl font-bold mb-4 text-pink-800">Select Courses</h2>
-          <select onChange={handleCourseSelect} className="w-full p-2 border rounded">
+          <h2 className="text-xl font-bold mb-4 text-pink-800">
+            Select Courses
+          </h2>
+          <select
+            onChange={handleCourseSelect}
+            className="w-full p-2 border rounded"
+          >
             <option value="">Select a Course</option>
             {courses.map((course) => (
               <option key={course._id} value={course._id}>
@@ -423,10 +399,21 @@ export default function TeacherKnowledgeForm() {
 
           {/* Seçilen dersleri göster */}
           <div className="mt-4 space-y-2">
-            {formData.courses.map((course) => (
-              <div key={course._id} className="flex justify-between p-2 border rounded bg-gray-100">
-                <span>{course.courseName} ({course.courseCode})</span>
-                <button type="button" onClick={() => removeCourse(course._id)} className="text-red-500 font-bold">Remove</button>
+            {formData.courses.map((course, index) => (
+              <div
+                key={course._id || `course-${index}`}
+                className="flex justify-between p-2 border rounded bg-gray-100"
+              >
+                <span>
+                  {course.courseName} ({course.courseCode})
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeCourse(course._id)}
+                  className="text-red-500 font-bold"
+                >
+                  Remove
+                </button>
               </div>
             ))}
           </div>
@@ -438,7 +425,10 @@ export default function TeacherKnowledgeForm() {
             Office Hours
           </h2>
           {formData.officeHours.map((hours, index) => (
-            <div key={index} className="grid grid-cols-3 gap-4 mb-4">
+            <div
+              key={`office-hour-${index}`}
+              className="grid grid-cols-3 gap-4 mb-4"
+            >
               <div>
                 <label className="block mb-2 font-bold">Day</label>
                 <select
@@ -492,7 +482,8 @@ export default function TeacherKnowledgeForm() {
         {/* Submit Button */}
         <div className="mt-6">
           <button
-            type="submit"
+            type="button"
+            onClick={handleSubmit}
             className="w-full bg-green-500 text-white p-3 rounded-lg hover:bg-green-600 transition duration-300"
           >
             Submit Teacher Information

@@ -1,30 +1,50 @@
 "use client";
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import AdminSidebar from "./AdminSidebar";
 
 const AdminDashboard = () => {
-  const stats = {
-    totalTeachers: 15,
-    totalStudents: 120,
-    totalCourses: 8,
+  const [activeSection, setActiveSection] = useState("dashboard");
+  const [stats, setStats] = useState({ totalTeachers: 0, totalStudents: 0, totalCourses: 0 })
+  const [loading, setLoading] = useState(true);
+
+  const fetchStats = async () => {
+    setLoading(true);
+    try {
+      const [responseTeacher, responseStudent, responseCourse] = await Promise.all([
+        fetch("http://localhost:4000/api/teacher"),
+        fetch("http://localhost:4000/api/students"),
+        fetch("http://localhost:4000/api/courses"),
+      ]);
+  
+      if (!responseTeacher.ok || !responseStudent.ok || !responseCourse.ok) {
+        throw new Error("One or more requests failed.");
+      }
+  
+      const [dataTeacher, dataStudent, dataCourse] = await Promise.all([
+        responseTeacher.json(),
+        responseStudent.json(),
+        responseCourse.json(),
+      ]);
+  
+      if (dataTeacher.teachers && dataStudent.students && dataCourse.courses) {
+        setStats({
+          totalTeachers: dataTeacher.teachers.length,
+          totalStudents: dataStudent.students.length,
+          totalCourses: dataCourse.courses.length,
+        });
+      } else {
+        console.warn("Data format unexpected:", { dataTeacher, dataStudent, dataCourse });
+      }
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const [activeSection, setActiveSection] = useState("dashboard");
-
-  const recentActivities = [
-    "Teacher John Doe added a new course: English 101",
-    "Student Jane Smith registered for Spanish 202",
-    "Admin approved 5 new student registrations",
-    "Course Materials for Physics 301 updated",
-  ];
-
-  const teachers = [
-    { name: "John Doe", email: "john@example.com", specialization: "English" },
-    { name: "Jane Smith", email: "jane@example.com", specialization: "Math" },
-    { name: "Michael Brown", email: "michael@example.com", specialization: "Physics" },
-    { name: "Emily Davis", email: "emily@example.com", specialization: "History" },
-    { name: "Daniel White", email: "daniel@example.com", specialization: "Computer Science" },
-  ];
+  useEffect(() => {
+    fetchStats();
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-gray-100">
@@ -47,19 +67,6 @@ const AdminDashboard = () => {
               <p className="text-3xl font-semibold mt-2">{value}</p>
             </div>
           ))}
-        </div>
-
-        {/* Recent Activities & Teachers Table */}
-        <div className="grid grid-cols-3 gap-6">
-          {/* Recent Activities */}
-          <div className="col-span-2 bg-white p-6 shadow-md rounded-lg">
-            <h2 className="text-xl font-bold mb-4">Recent Activities</h2>
-            <ul className="list-disc list-inside text-gray-700 space-y-2">
-              {recentActivities.map((activity, index) => (
-                <li key={index}>{activity}</li>
-              ))}
-            </ul>
-          </div>
         </div>
       </div>
     </div>

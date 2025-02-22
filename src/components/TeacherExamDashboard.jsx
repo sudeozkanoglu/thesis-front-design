@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import {
   Card,
   CardContent,
@@ -12,22 +12,23 @@ import {
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import BookIcon from "@mui/icons-material/Book";
-import {useRouter} from "next/navigation";
+import { useRouter } from "next/navigation";
 
-export default function TeacherExamDashboard({userId}) {
+export default function TeacherExamDashboard({ userId }) {
   const [teacher, setTeacher] = useState(null);
+  const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   const router = useRouter();
-  
+
   const [courses, setCourses] = useState([]);
 
   useEffect(() => {
     const fetchCourses = async () => {
       try {
         const response = await fetch(
-          `http://localhost:4000/api/teacher/user/${userId}`
+          `http://localhost:4000/api/teacher/${userId}`
         );
         const data = await response.json();
 
@@ -47,6 +48,35 @@ export default function TeacherExamDashboard({userId}) {
 
     fetchCourses();
   }, [userId]);
+
+  useEffect(() => {
+    const fetchExams = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:4000/api/teacher/${userId}/exams`
+        );
+        const data = await response.json();
+
+        if (data.success) {
+          setExams(data.exams);
+        } else {
+          setError("No exams found.");
+        }
+      } catch (err) {
+        console.error("Error fetching exams:", err);
+        setError("Failed to fetch exams.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExams();
+  }, [userId]);
+
+  const examCounts = exams.reduce((acc, exam) => {
+    acc[exam.course._id] = (acc[exam.course._id] || 0) + 1;
+    return acc;
+  }, {});
 
   if (loading) {
     return (
@@ -68,16 +98,10 @@ export default function TeacherExamDashboard({userId}) {
     <Container maxWidth="xl" className="py-10">
       {/* Header Section */}
       <Box className="text-center mb-10">
-        <Typography
-          variant="h3"
-          className="font-bold text-gray-800"
-        >
+        <Typography variant="h3" className="font-bold text-gray-800">
           My Courses
         </Typography>
-        <Typography
-          variant="subtitle1"
-          className="mt-2 text-gray-600"
-        >
+        <Typography variant="subtitle1" className="mt-2 text-gray-600">
           Manage your courses and exams with ease
         </Typography>
       </Box>
@@ -96,10 +120,7 @@ export default function TeacherExamDashboard({userId}) {
                   size="small"
                   className="mb-2 bg-indigo-100 text-indigo-600"
                 />
-                <Typography
-                  variant="h6"
-                  className="font-medium text-gray-800"
-                >
+                <Typography variant="h6" className="font-medium text-gray-800">
                   {course.courseName}
                 </Typography>
               </Box>
@@ -116,7 +137,7 @@ export default function TeacherExamDashboard({userId}) {
                 <Box className="flex items-center gap-2">
                   <BookIcon fontSize="small" className="text-indigo-600" />
                   <Typography variant="body2" className="text-gray-600">
-                    {course.exams.length} Exams
+                    {examCounts[course._id] ?? 0} Exams
                   </Typography>
                 </Box>
               </Box>
@@ -127,7 +148,7 @@ export default function TeacherExamDashboard({userId}) {
                   size="small"
                   color="secondary"
                   className="w-full bg-gradient-to-r from-indigo-500 to-indigo-700 text-white"
-                  onClick={() => router.push("/lessonView")}
+                  onClick={() => router.push(`/lessonView/${course._id}`)}
                 >
                   View
                 </Button>

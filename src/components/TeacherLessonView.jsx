@@ -1,5 +1,14 @@
-import React from 'react';
-import { Card, CardContent, Badge, Button } from "@mui/material";
+import React, { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  Badge,
+  Button,
+  CircularProgress,
+  Typography,
+  Divider,
+} from "@mui/material";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import {
   CheckCircle as CheckCircle2,
   Cancel as XCircle,
@@ -7,206 +16,245 @@ import {
   BarChart as BarChart3,
   AccessTime as Clock,
   EmojiEvents as Award,
-  Description as FileText
-} from '@mui/icons-material';
-import { useRouter } from 'next/navigation';
+  Description as FileText,
+} from "@mui/icons-material";
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import { useRouter } from "next/navigation";
+import ExamCreationModal from "./ExamCreationModal";
 
-const TeacherLessonView = () => {
-  const lessonContent = {
-    title: "Technical English for Engineers",
-    description: "Essential technical terminology and communication skills for engineering contexts and problem-solving",
-    totalExams: 5,
-    completedExams: 3,
-    exams: [
-      {
-        id: 1,
-        title: "Speaking Assestment A",
-        status: "completed",
-        score: 86,
-        timeSpent: "45 min",
-        totalQuestions: 20,
-        correctAnswers: 17,
-        completedDate: "2024-15-11",
-        studentResults: [
-          { name: "Score 90+", count: 15 },
-          { name: "Score 80-89", count: 25 },
-          { name: "Score 70-79", count: 18 },
-          { name: "Score <70", count: 12 }
-        ]
-      },
-      {
-        id: 2,
-        title: "Speaking Assestment B",
-        status: "completed",
-        score: 78,
-        timeSpent: "38 min",
-        totalQuestions: 15,
-        correctAnswers: 14,
-        completedDate: "2024-28-11",
-        studentResults: [
-          { name: "Score 90+", count: 20 },
-          { name: "Score 80-89", count: 22 },
-          { name: "Score 70-79", count: 15 },
-          { name: "Score <70", count: 8 }
-        ]
-      },
-      {
-        id: 3,
-        title: "Speaking Assestment C",
-        status: "pending",
-        dueDate: "2024-25-12"
-      },
-      {
-        id: 4,
-        title: "Midterm Test",
-        status: "completed",
-        score: 90,
-        timeSpent: "50 min",
-        totalQuestions: 25,
-        correctAnswers: 20,
-        completedDate: "2024-10-12",
-        studentResults: [
-          { name: "Score 90+", count: 12 },
-          { name: "Score 80-89", count: 28 },
-          { name: "Score 70-79", count: 20 },
-          { name: "Score <70", count: 15 }
-        ]
-      },
-      {
-        id: 5,
-        title: "Final Exam",
-        status: "pending",
-        dueDate: "2025-10-01"
+const TeacherLessonView = ({ courseId, teacherId }) => {
+  const [lessonContent, setLessonContent] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [openModal, setOpenModal] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!courseId) return;
+    fetchCourseAndExams();
+  }, [courseId]);
+
+  const fetchCourseAndExams = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:4000/api/courses/${courseId}`
+      );
+      const data = await response.json();
+
+      if (data.success) {
+        const examsWithQuestions = await Promise.all(
+          data.course.exams.map(async (exam) => {
+            const examResponse = await fetch(
+              `http://localhost:4000/api/exams/${exam._id}`
+            );
+            const examData = await examResponse.json();
+            return { ...exam, questions: examData.exam?.questions || [] };
+          })
+        );
+        setLessonContent({
+          title: data.course.courseName,
+          description: data.course.description,
+          totalExams: data.course.exams.length,
+          completedExams: data.course.exams.filter(
+            (exam) => exam.status === "completed"
+          ).length,
+          exams: examsWithQuestions,
+        });
       }
-    ]
+    } catch (error) {
+      console.error("Error fetching course and exams:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const calculateParticipationRate = (studentResults) => {
-    const totalStudents = studentResults.reduce((sum, group) => sum + group.count, 0);
-    return totalStudents > 0 ? `${totalStudents} students` : "No participants";
+    if (!studentResults) return "No participants";
+    const totalStudents = studentResults.reduce(
+      (sum, group) => sum + group.count,
+      0
+    );
+    return `${totalStudents} students`;
   };
-
-  const router = useRouter();
 
   const ExamStatistics = ({ exam }) => {
     if (exam.status !== "completed") return null;
 
-    const highestScoreGroup = exam.studentResults.reduce((prev, current) => (prev.name > current.name ? prev : current));
-    const lowestScoreGroup = exam.studentResults.reduce((prev, current) => (prev.name < current.name ? prev : current));
+    const highestScoreGroup = exam.studentResults?.reduce((prev, current) =>
+      prev.count > current.count ? prev : current
+    );
+
+    const lowestScoreGroup = exam.studentResults?.reduce((prev, current) =>
+      prev.count < current.count ? prev : current
+    );
 
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-        <div className="flex items-center gap-2 bg-blue-50 p-2 rounded-lg">
-          <Award className="w-4 h-4 text-blue-500" />
-          <div>
-            <p className="text-sm text-gray-600">Average Score</p>
-            <p className="text-lg font-semibold">{exam.score}%</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 bg-green-50 p-2 rounded-lg">
-          <FileText className="w-4 h-4 text-green-500" />
-          <div>
-            <p className="text-sm text-gray-600">Success Rate</p>
-            <p className="text-lg font-semibold">{Math.round((exam.correctAnswers / exam.totalQuestions) * 100)}%</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 bg-orange-50 p-2 rounded-lg">
-          <Clock className="w-4 h-4 text-orange-500" />
-          <div>
-            <p className="text-sm text-gray-600">Avg. Time Spent</p>
-            <p className="text-lg font-semibold">{exam.timeSpent}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 bg-purple-50 p-2 rounded-lg">
-          <BarChart3 className="w-4 h-4 text-purple-500" />
-          <div>
-            <p className="text-sm text-gray-600">Participation</p>
-            <p className="text-lg font-semibold">{calculateParticipationRate(exam.studentResults)}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 bg-red-50 p-2 rounded-lg">
-          <XCircle className="w-4 h-4 text-red-500" />
-          <div>
-            <p className="text-sm text-gray-600">Lowest Score</p>
-            <p className="text-lg font-semibold">{lowestScoreGroup.name}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2 bg-teal-50 p-2 rounded-lg">
-          <CheckCircle2 className="w-4 h-4 text-teal-500" />
-          <div>
-            <p className="text-sm text-gray-600">Highest Score</p>
-            <p className="text-lg font-semibold">{highestScoreGroup.name}</p>
-          </div>
-        </div>
+        <StatisticItem
+          icon={<Award />}
+          label="Average Score"
+          value={`${exam.averageScore || 0}%`}
+        />
+        <StatisticItem
+          icon={<FileText />}
+          label="Success Rate"
+          value={`${exam.successRate || 0}%`}
+        />
+        <StatisticItem
+          icon={<Clock />}
+          label="Avg. Time Spent"
+          value={exam.timeSpent ?? "N/A"}
+        />
+        <StatisticItem
+          icon={<BarChart3 />}
+          label="Participation"
+          value={calculateParticipationRate(exam.studentResults)}
+        />
+        <StatisticItem
+          icon={<XCircle />}
+          label="Lowest Score"
+          value={lowestScoreGroup?.name ?? "N/A"}
+        />
+        <StatisticItem
+          icon={<CheckCircle2 />}
+          label="Highest Score"
+          value={highestScoreGroup?.name ?? "N/A"}
+        />
       </div>
     );
   };
 
+  const StatisticItem = ({ icon, label, value }) => (
+    <div className="flex items-center gap-2 bg-blue-50 p-2 rounded-lg">
+      {icon}
+      <div>
+        <p className="text-sm text-gray-600">{label}</p>
+        <p className="text-lg font-semibold">{value}</p>
+      </div>
+    </div>
+  );
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <CircularProgress />
+      </div>
+    );
+  }
+
+  if (!lessonContent) {
+    return (
+      <p className="text-center text-red-500">Failed to load course data.</p>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto p-6">
-      <Card className="mb-8 bg-gradient-to-r from-blue-50 to-indigo-50">
+      <Card className="mb-8 shadow-md hover:shadow-lg transition-shadow bg-gradient-to-r from-blue-50 to-indigo-50">
         <CardContent className="p-6">
-          <div className="flex flex-col">
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <h2 className="text-3xl font-bold mb-2">{lessonContent.title}</h2>
-                <p className="text-gray-600 text-lg">{lessonContent.description}</p>
-              </div>
-              <Badge variant="outlined" className="text-blue-700 text-lg px-4 py-2">
-                {lessonContent.completedExams}/{lessonContent.totalExams} Completed
-              </Badge>
-            </div>
+          <div className="flex justify-between items-start">
             <div>
-              <p className="text-sm font-semibold  text-gray-600 mb-2">Overall Progress</p>
-              <progress
-                value={(lessonContent.completedExams / lessonContent.totalExams) * 100}
-                className="h-3"
-              />
+              <h2 className="text-3xl font-bold mb-2">{lessonContent.title}</h2>
+              <p className="text-gray-600 text-lg">
+                {lessonContent.description}
+              </p>
             </div>
+            <Badge className="text-blue-700 text-lg px-4 py-2">
+              {lessonContent.completedExams}/{lessonContent.totalExams}{" "}
+              Completed
+            </Badge>
           </div>
+          <progress
+            value={
+              (lessonContent.completedExams / lessonContent.totalExams) * 100
+            }
+            className="w-full h-3 mt-4"
+          />
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {lessonContent.exams.map((exam) => (
-          <Card key={exam.id} className="hover:shadow-md transition-shadow">
+          <Card
+            key={exam._id}
+            className="shadow-md hover:shadow-lg transition-shadow bg-slate-50"
+          >
             <CardContent className="p-4">
               <div className="flex justify-between items-start">
                 <div className="flex items-center gap-3">
                   {exam.status === "completed" ? (
-                    <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    <CheckCircle2 className="text-green-500" />
                   ) : (
-                    <XCircle className="w-5 h-5 text-gray-400" />
+                    <XCircle className="text-gray-400" />
                   )}
                   <div>
-                    <h3 className="font-semibold text-lg">{exam.title}</h3>
+                    <h3 className="font-semibold text-lg">{exam.examName}</h3>
                     <p className="text-sm text-gray-600">
                       {exam.status === "completed"
-                        ? `Completed on ${new Date(exam.completedDate).toLocaleDateString()}`
-                        : `Due by ${new Date(exam.dueDate).toLocaleDateString()}`}
+                        ? `Completed on ${new Date(
+                            exam.examDate
+                          ).toLocaleDateString()}`
+                        : `Due by ${new Date(
+                            exam.dueDate
+                          ).toLocaleDateString()}`}
                     </p>
                   </div>
                 </div>
-                {exam.status === "pending" && (
-                  <div className='flex justify-center items-center h-full'>
-                    <div className="flex justify-center">
-                    <Button size="small" className="bg-blue-500 text-white hover:bg-blue-600 flex justify-center" onClick={() => router.push("/createQuestions")}>
-                      <Plus className="w-4 h-4 mr-1" />
-                      Take Exam
-                    </Button>
-                    </div>
-                  </div>
+                {exam.questions && exam.questions.length > 0 ? (
+                  <Button
+                    size="small"
+                    className="bg-green-500 text-white hover:bg-green-600"
+                    onClick={() => router.push(`/createQuestions/${exam._id}`)}
+                  >
+                    <VisibilityIcon className="mr-1 w-8 h-8" />
+                    View Questions
+                  </Button>
+                ) : (
+                  <Button
+                    size="small"
+                    className="bg-blue-500 text-white hover:bg-blue-600"
+                    onClick={() => router.push(`/createQuestions/${exam._id}`)}
+                  >
+                    <Plus className="mr-1" />
+                    Add Questions
+                  </Button>
                 )}
               </div>
+              <Divider className="my-3" />
               <ExamStatistics exam={exam} />
-              {exam.status === "pending" && (
-                <div className="flex justify-center items-center h-full mt-24">
-                  <p className='text-gray-500 text-lg font-medium'>No exams have been taken yet.</p>
-                </div>
-              )}
             </CardContent>
           </Card>
         ))}
+
+        {/* Add New Exam Card - Matches other cards */}
+        <Card className="shadow-md hover:shadow-lg transition-shadow bg-slate-50">
+          <CardContent className="flex flex-col justify-center items-center text-center p-6">
+            <AddCircleOutlineIcon
+              className="text-blue-500"
+              style={{ fontSize: 50 }}
+            />
+            <Typography variant="h6" className="text-gray-800 mt-4">
+              Create New Exam
+            </Typography>
+            <Button
+              variant="contained"
+              size="small"
+              color="primary"
+              className="w-full mt-4 bg-gradient-to-r from-green-500 to-green-700 text-white"
+              onClick={() => setOpenModal(true)}
+            >
+              Add Exam
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Modal */}
+        <ExamCreationModal
+          open={openModal}
+          onClose={() => setOpenModal(false)}
+          courseId={courseId}
+          teacherId={teacherId}
+          onExamCreated={fetchCourseAndExams}
+        />
       </div>
     </div>
   );

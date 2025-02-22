@@ -15,33 +15,33 @@ import {
   DialogTitle,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
-import TeacherKnowledgeModal from "@/components/admin/TeacherKnowledgeModal";
+import StudentKnowledgeModal from "@/components/admin/StudentKnowledgeModal";
 
-const TeacherTable = ({ teachers, fetchTeachers }) => {
+const StudentTable = ({ students, fetchStudents }) => {
   const router = useRouter();
   const [openModal, setOpenModal] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
-  const [selectedTeacher, setSelectedTeacher] = useState(null);
+  const [selectedStudent, setSelectedStudent] = useState(null);
 
-  // 📌 Güncelleme fonksiyonu (Öğretmen ID ile yönlendirme yapar)
-  const handleUpdate = (teacher) => {
-    setSelectedTeacher(teacher);
+  // 📌 Update function
+  const handleUpdate = (student) => {
+    setSelectedStudent(student);
     setOpenModal(true);
   };
 
-  // 📌 Silme işlemi için modal aç
-  const confirmDelete = (teacherId) => {
-    setSelectedTeacher(teacherId);
+  // 📌 Open delete confirmation dialog
+  const confirmDelete = (studentId) => {
+    setSelectedStudent(studentId);
     setOpenDialog(true);
   };
 
-  // 📌 Öğretmeni veritabanından sil
+  // 📌 Delete student from database
   const handleDelete = async () => {
-    if (!selectedTeacher) return;
+    if (!selectedStudent) return;
 
     try {
       const response = await fetch(
-        `http://localhost:4000/api/teacher/${selectedTeacher}`,
+        `http://localhost:4000/api/students/${selectedStudent}`,
         {
           method: "DELETE",
         }
@@ -49,33 +49,33 @@ const TeacherTable = ({ teachers, fetchTeachers }) => {
 
       const data = await response.json();
       if (data.success) {
-        alert("Teacher deleted successfully!");
-        fetchTeachers(); // Güncellenmiş öğretmen listesini tekrar getir
+        alert("Student deleted successfully!");
+        fetchStudents(); // Refresh student list
       } else {
-        alert("Error deleting teacher: " + data.message);
+        alert("Error deleting student: " + data.message);
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("An error occurred while deleting the teacher.");
+      alert("An error occurred while deleting the student.");
     } finally {
       setOpenDialog(false);
-      setSelectedTeacher(null);
+      setSelectedStudent(null);
     }
   };
 
   return (
     <div className="bg-gray-100 p-6">
       <Typography variant="h4" color="primary" className="mb-4">
-        Teachers List
+        Students List
       </Typography>
 
-      {teachers.length > 0 ? (
+      {students.length > 0 ? (
         <Grid container spacing={3}>
-          {teachers.map((teacher) => (
-            <Grid item xs={12} sm={6} md={4} key={teacher._id}>
+          {students.map((student) => (
+            <Grid item xs={12} sm={6} md={4} key={student._id}>
               <Card sx={{ borderRadius: "12px", boxShadow: 3, padding: 2 }}>
                 <CardContent>
-                  {/* Avatar ve İsim */}
+                  {/* Avatar and Name */}
                   <Stack direction="row" spacing={2} alignItems="center">
                     <Avatar
                       sx={{
@@ -85,71 +85,44 @@ const TeacherTable = ({ teachers, fetchTeachers }) => {
                         fontSize: 24,
                       }}
                     >
-                      {`${teacher.firstName?.charAt(0) ?? ""}${
-                        teacher.lastName?.charAt(0) ?? ""
+                      {`${student.firstName?.charAt(0) ?? ""}${
+                        student.lastName?.charAt(0) ?? ""
                       }`}
                     </Avatar>
                     <Typography variant="h6" fontWeight="bold">
-                      {teacher.firstName} {teacher.lastName}
+                      {student.firstName} {student.lastName}
                     </Typography>
                   </Stack>
 
-                  {/* Email ve Telefon */}
+                  {/* Email */}
                   <Typography
                     variant="body2"
                     color="textSecondary"
                     sx={{ mt: 1 }}
                   >
-                    📧 {teacher.email}
-                  </Typography>
-                  <Typography variant="body2" color="textSecondary">
-                    📞 {teacher.phoneNumber}
+                    📧 {student.email}
                   </Typography>
 
-                  {/* Departman ve Uzmanlık Alanları */}
-                  <Typography
-                    variant="subtitle1"
-                    color="secondary"
-                    sx={{ mt: 1 }}
-                  >
-                    {teacher.department} - {teacher.degreeLevel}
-                  </Typography>
+                  {/* Enrolled Courses */}
                   <Typography
                     variant="body2"
                     color="textSecondary"
-                    sx={{ mt: 1 }}
+                    sx={{ mt: 2 }}
                   >
-                    <strong>Expertise:</strong>{" "}
-                    {teacher.expertiseAreas.join(", ") || "Not specified"}
+                    📚 Courses:{" "}
+                    {student.courses.length > 0
+                      ? student.courses.map((course) => course.courseName).join(", ")
+                      : "Not enrolled"}
                   </Typography>
 
-                  {/* Ders ve Ofis Saatleri */}
-                  <Typography
-                    variant="body2"
-                    sx={{ mt: 2, fontWeight: "bold" }}
-                  >
-                    🏫 Room: {teacher.roomNumber || "N/A"}
-                  </Typography>
-                  <Typography variant="body2" sx={{ mt: 1 }}>
-                    ⏳ Office Hours:{" "}
-                    {teacher.officeHours.length > 0
-                      ? teacher.officeHours
-                          .map(
-                            (hour) =>
-                              `${hour.day}: ${hour.startTime} - ${hour.endTime}`
-                          )
-                          .join(", ")
-                      : "Not available"}
-                  </Typography>
-
-                  {/* 📌 Güncelleme ve Silme Butonları */}
+                  {/* 📌 Update and Delete Buttons */}
                   <Stack direction="row" spacing={2} sx={{ mt: 2 }}>
                     <Button
                       variant="contained"
                       color="primary"
                       fullWidth
                       sx={{ borderRadius: "8px" }}
-                      onClick={() => handleUpdate(teacher)}
+                      onClick={() => handleUpdate(student)}
                     >
                       Update
                     </Button>
@@ -158,7 +131,7 @@ const TeacherTable = ({ teachers, fetchTeachers }) => {
                       color="error"
                       fullWidth
                       sx={{ borderRadius: "8px" }}
-                      onClick={() => confirmDelete(teacher._id)}
+                      onClick={() => confirmDelete(student._id)}
                     >
                       Delete
                     </Button>
@@ -170,16 +143,16 @@ const TeacherTable = ({ teachers, fetchTeachers }) => {
         </Grid>
       ) : (
         <Typography variant="body1" align="center" color="textSecondary">
-          No teachers available.
+          No students available.
         </Typography>
       )}
 
-      {/* 📌 Öğretmen Silme Onay Dialog */}
+      {/* 📌 Delete Confirmation Dialog */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle>Delete Teacher</DialogTitle>
+        <DialogTitle>Delete Student</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete this teacher? This action cannot be
+            Are you sure you want to delete this student? This action cannot be
             undone.
           </DialogContentText>
         </DialogContent>
@@ -193,13 +166,14 @@ const TeacherTable = ({ teachers, fetchTeachers }) => {
         </DialogActions>
       </Dialog>
 
-      <TeacherKnowledgeModal
+      {/* 📌 Student Update Modal */}
+      <StudentKnowledgeModal
         open={openModal}
         onClose={() => setOpenModal(false)}
-        existingTeacher={selectedTeacher}
+        existingStudent={selectedStudent}
       />
     </div>
   );
 };
 
-export default TeacherTable;
+export default StudentTable;

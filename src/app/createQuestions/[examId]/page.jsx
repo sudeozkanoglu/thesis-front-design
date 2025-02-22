@@ -1,14 +1,18 @@
 "use client";
 
-import React, {useState} from "react";
-import Footer from "../../components/Footer";
-import Navbar from "../../components/Navbar";
-import Sidebar from "../../components/Sidebar";
-import ExamStatistics from "../../components/ExamStatistics";
-import TeacherLessonView from "../../components/TeacherLessonView";
+import React, { useState } from 'react';
+import { useParams } from "next/navigation";
+import Footer from "@/components/Footer";
+import Sidebar from "@/components/Sidebar";
+import Navbar from "@/components/Navbar";
+import QuestionBuilder from '@/components/QuestionBuilder';
+import ExamStatistics from "@/components/ExamStatistics";
 
-const LessonView = () => {
+const CreateQuestions = () => {
     const [activeLink, setActiveLink] = useState("Exam");
+    const {examId} = useParams();
+
+    if (!examId) return <p className="text-center">Loading...</p>;
 
     return (
         <div className="min-h-screen bg-slate-100">
@@ -22,13 +26,12 @@ const LessonView = () => {
 
         {/* Right Column */}
         <div className="flex-1 bg-white rounded-lg shadow-md p-6">
-          <TeacherLessonView />
+          <QuestionBuilder examId={examId} />
         </div>
       </div>
       <Footer />
     </div>
     );
-}
+};
 
-export default LessonView;
-
+export default CreateQuestions;

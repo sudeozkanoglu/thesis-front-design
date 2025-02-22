@@ -10,7 +10,7 @@ const Sidebar = ({ activeLink, setActiveLink }) => {
   // localStorage'dan userType'ı yükle
   useEffect(() => {
     const storedUserType = localStorage.getItem("userType");
-    setUserType(storedUserType || "student"); // Varsayılan olarak "student"
+    setUserType(storedUserType || "Student"); // Varsayılan olarak "student"
   }, []);
 
   const capitalizeFirstLetter = (string) => {
@@ -22,7 +22,7 @@ const Sidebar = ({ activeLink, setActiveLink }) => {
       return "/help"; // Help sayfası her iki kullanıcı için ortak
     }
 
-    if (userType === "teacher") {
+    if (userType === "Teacher") {
       const adjustedPath =
         basePath === "/" ? "Dashboard" : capitalizeFirstLetter(basePath.slice(1));
       return `/teacher${adjustedPath}`;

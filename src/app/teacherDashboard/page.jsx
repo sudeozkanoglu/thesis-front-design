@@ -1,18 +1,53 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Footer from "@/components/Footer";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
 import Calendar from "@/components/Calendar";
-import ExamStatistics from "@/components/ExamStatistics"; 
+import ExamStatistics from "@/components/ExamStatistics";
 
 const TeacherDashboard = () => {
   const [activeLink, setActiveLink] = useState("Dashboard");
+  const [personDatas, setPersonDatas] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [userId, setUserId] = useState(null);
 
-  const personData = {
-    personName: "Dr. Sarah Johnson",
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedUserId = localStorage.getItem("userId");
+      setUserId(storedUserId);
+    }
+  }, []);
+
+  const personData = async () => {
+    if (!userId) return;
+  
+    setLoading(true);
+    setError(null);
+  
+    try {
+      const response = await fetch(`http://localhost:4000/api/teacher/${userId}`);
+      const data = await response.json();
+      if (response.ok) {
+        setPersonDatas(data.teacher);
+      } else {
+        throw new Error(data.message || "Failed to fetch teacher data.");
+      }
+    } catch (err) {
+      console.error("Error fetching teacher data:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
+
+  useEffect(() => {
+    if (userId) {
+      personData();
+    }
+  }, [userId]);
 
   const calendarData = [
     {
@@ -65,7 +100,7 @@ const TeacherDashboard = () => {
 
         {/* Right Column */}
         <div className="flex-1 bg-white rounded-lg shadow-md p-6">
-          <Calendar calendarData={calendarData} personData={personData} />
+          <Calendar calendarData={calendarData} personData={personDatas} />
         </div>
       </div>
       <Footer />
