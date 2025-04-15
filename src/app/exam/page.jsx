@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
 import { Card, CardContent } from "@mui/material";
 import Footer from "../../components/Footer";
 import Sidebar from "../../components/Sidebar";
@@ -10,52 +9,42 @@ import ExamResult from "../../components/ExamResult";
 import { useRouter } from "next/navigation";
 
 const ExamLayout = () => {
-  const [activeLink, setActiveLink] = useState("Exams");
-
-  const studentName = "Jennifer Melfi";
-
   const router = useRouter();
+  const [activeLink, setActiveLink] = useState("Exams");
+  const [studentId, setStudentId] = useState(null);
+  const [exams, setExams] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const getInitials = (name) => {
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("");
-  };
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedId = localStorage.getItem("userId");
+      setStudentId(storedId);
+    }
+  }, []);
 
-  const exams = [
-    {
-      id: 1,
-      name: "Technical English for Engineers",
-      date: "2025-01-11",
-      time: "23:54",
-      isCompleted: false,
-      type: "EN-TR",
-      endTime: "23:58",
-    },
-    {
-      id: 2,
-      name: "Everyday English Conversation",
-      date: "2025-02-10",
-      time: "22:20",
-      isCompleted: false,
-      type: "EN-TR",
-      endTime: "23:00",
-    },
-    {
-      id: 3,
-      name: "English for Digital Media",
-      date: "2024-12-26",
-      time: "19:20",
-      isCompleted: true,
-      type: "TR-EN",
-      endTime: "19:40",
-    },
-  ];
+  useEffect(() => {
+    if (!studentId) return;
 
-  // Sıralama: 
-  // 1) Başlamamış (examStartTime > now) sınavlar yukarıda.  
-  // 2) Biten ya da başlayan (examStartTime <= now) sınavlar aşağıda.  
+    const fetchExams = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:4000/api/students/${studentId}/exams`
+        );
+        const data = await res.json();
+        setExams(data.exams || []);
+      } catch (err) {
+        console.error("Failed to fetch exams:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchExams();
+  }, [studentId]);
+
+  // Sıralama:
+  // 1) Başlamamış (examStartTime > now) sınavlar yukarıda.
+  // 2) Biten ya da başlayan (examStartTime <= now) sınavlar aşağıda.
   // İki grup da kendi içinde artan tarih sıralaması (en erken tarihten en geçe).
   const sortedExams = [...exams].sort((a, b) => {
     const now = new Date();
@@ -84,7 +73,7 @@ const ExamLayout = () => {
         {/* Left Column */}
         <div className="w-64 flex flex-col gap-4">
           {/* Sidebar */}
-         <Sidebar activeLink={activeLink} setActiveLink={setActiveLink} />
+          <Sidebar activeLink={activeLink} setActiveLink={setActiveLink} />
 
           {/* Exam Results */}
           <ExamResult />
@@ -97,41 +86,29 @@ const ExamLayout = () => {
             <h1 className="text-2xl font-bold text-slate-800 flex-1">
               Upcoming Exams
             </h1>
-
-            {/* Sağda Öğrenci Bilgisi */}
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold">
-                {getInitials(studentName)}
-              </div>
-              <h2 className="text-lg font-semibold text-slate-800">
-                {studentName}
-              </h2>
-            </div>
           </div>
           <div className="flex flex-col gap-6 p-6">
-          {sortedExams.map((exam) => {
+            {sortedExams.map((exam) => {
               const now = new Date();
-              const examStartTime = new Date(`${exam.date}T${exam.time}`);
-              const examEndTime = new Date(`${exam.date}T${exam.endTime}`);
+              const examStartTime = new Date(exam.examDate);
+              const examEndTime = new Date(exam.examDate);
+              examEndTime.setMinutes(
+                examEndTime.getMinutes() + (exam.duration || 0)
+              );
 
-              // Henüz başlamadı mı?
               const isBeforeExamStart = now < examStartTime;
-              // Sınav bitti mi? (endTime geçmişse)
               const isAfterExamEnd = now > examEndTime;
 
-              // Buton varsayılanları
               let buttonText = "Start Exam";
               let isButtonDisabled = false;
-              let buttonClasses = "bg-blue-950 text-white hover:bg-blue-800 cursor-pointer";
+              let buttonClasses =
+                "bg-blue-950 text-white hover:bg-blue-800 cursor-pointer";
 
-              // Sınav tamamlanmış veya bitiş saati geçmişse => "Show Result" (aktif)
-              if (exam.isCompleted || isAfterExamEnd) {
+              if (exam.status === "completed" || isAfterExamEnd) {
                 buttonText = "Show Result";
                 isButtonDisabled = false;
                 buttonClasses = "bg-green-600 text-white hover:bg-green-700";
-              }
-              // Henüz başlamadıysa => "Start Exam" (pasif)
-              else if (isBeforeExamStart) {
+              } else if (isBeforeExamStart) {
                 buttonText = "Start Exam";
                 isButtonDisabled = true;
                 buttonClasses = "bg-gray-400 text-gray-200 cursor-not-allowed";
@@ -144,30 +121,38 @@ const ExamLayout = () => {
                   router.push("/examInterface");
                 }
               };
-              // Aksi durumda (şu an sınav zamanındaysa) => "Start Exam" (aktif)
+
+              const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1);
 
               return (
-                <Card key={exam.id} className="shadow-md bg-gray-50">
+                <Card key={exam._id} className="shadow-md bg-gray-50">
                   <CardContent className="p-6">
                     <div className="flex justify-between items-center mb-2">
-                      {/* Sınav Adı */}
-                      <h3 className="font-semibold text-lg">{exam.name}</h3>
-                      {/* Sınav Türü */}
+                      <h3 className="font-semibold text-lg">{exam.examName}</h3>
                       <span
                         className={`px-2 py-1 rounded-md text-white text-sm font-semibold ${
-                          exam.type.startsWith("TR-EN")
-                            ? "bg-yellow-500"
-                            : "bg-orange-500"
+                          exam.examType === "quiz"
+                            ? "bg-indigo-500"
+                            : exam.examType === "midterm"
+                            ? "bg-orange-500"
+                            : "bg-red-500"
                         }`}
                       >
-                        {exam.type.startsWith("TR-EN") ? "TR-EN" : "EN-TR"}
+                        {capitalize(exam.examType)}
                       </span>
                     </div>
-                    {/* Sınav Tarihi ve Saat Aralığı */}
                     <p className="text-gray-600 mb-4">
-                      {exam.date} - {exam.time} to {exam.endTime}
+                      {examStartTime.toLocaleDateString()} -{" "}
+                      {examStartTime.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}{" "}
+                      to{" "}
+                      {examEndTime.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </p>
-                    {/* Buton */}
                     <button
                       className={`w-full p-2 rounded-md font-semibold ${buttonClasses}`}
                       disabled={isButtonDisabled}
