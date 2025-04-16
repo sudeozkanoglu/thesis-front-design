@@ -13,6 +13,7 @@ const TeacherDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [calendarData, setCalendarData] = useState([]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -49,44 +50,44 @@ const TeacherDashboard = () => {
     }
   }, [userId]);
 
-  const calendarData = [
-    {
-      id: 1,
-      subject: "Business English",
-      date: 2,
-      time: "10:00",
-      endTime: "10:40",
-      color: "bg-pink-100 text-pink-700",
-      type: "EN-TR",
-    },
-    {
-      id: 2,
-      subject: "Legal English",
-      date: 3,
-      time: "14:00",
-      endTime: "14:30",
-      color: "bg-purple-100 text-purple-700",
-      type: "EN-TR",
-    },
-    {
-      id: 3,
-      subject: "Technical English for Engineers",
-      date: 11,
-      time: "11:00",
-      endTime: "12:00",
-      color: "bg-blue-100 text-blue-700",
-      type: "TR-EN",
-    },
-    {
-      id: 4,
-      subject: "English for Tourism and Hospitality",
-      date: 12,
-      time: "15:00",
-      endTime: "16:30",
-      color: "bg-green-100 text-green-700",
-      type: "TR-EN",
-    },
-  ];
+  useEffect(() => {
+    if (!userId) return;
+  
+    const fetchTeacherExams = async () => {
+      try {
+        const res = await fetch(`http://localhost:4000/api/teacher/${userId}/exams`);
+        const data = await res.json();
+  
+        const mapped = (data.exams || []).map((exam) => {
+          const start = new Date(exam.examDate);
+          const end = new Date(start);
+          end.setMinutes(start.getMinutes() + (exam.duration || 0));
+  
+          return {
+            id: exam._id,
+            subject: exam.examName,
+            fullDate: start.toISOString(),
+            time: start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            endTime: end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+            color:
+              exam.examType === "midterm"
+                ? "bg-orange-100 text-orange-800"
+                : exam.examType === "final"
+                ? "bg-red-100 text-red-800"
+                : "bg-green-100 text-green-800",
+            type: exam.examType.toUpperCase(),
+            courseName: exam.course?.courseName || "Unknown Course",
+          };
+        });
+  
+        setCalendarData(mapped);
+      } catch (err) {
+        console.error("Error fetching teacher exams:", err);
+      }
+    };
+  
+    fetchTeacherExams();
+  }, [userId]);
 
   return (
     <div className="min-h-screen bg-slate-100">

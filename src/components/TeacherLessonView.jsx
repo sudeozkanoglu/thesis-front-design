@@ -18,7 +18,7 @@ import {
   EmojiEvents as Award,
   Description as FileText,
 } from "@mui/icons-material";
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { useRouter } from "next/navigation";
 import ExamCreationModal from "./ExamCreationModal";
 
@@ -149,6 +149,16 @@ const TeacherLessonView = ({ courseId, teacherId }) => {
 
   return (
     <div className="max-w-7xl mx-auto p-6">
+      <div className="mb-4 flex justify-start-4">
+        <Button
+          variant="outlined"
+          color="secondary"
+          onClick={() => router.back()}
+          className="flex items-center gap-2"
+        >
+          ← Back
+        </Button>
+      </div>
       <Card className="mb-8 shadow-md hover:shadow-lg transition-shadow bg-gradient-to-r from-blue-50 to-indigo-50">
         <CardContent className="p-6">
           <div className="flex justify-between items-start">

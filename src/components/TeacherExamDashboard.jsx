@@ -13,12 +13,15 @@ import {
 import PersonIcon from "@mui/icons-material/Person";
 import BookIcon from "@mui/icons-material/Book";
 import { useRouter } from "next/navigation";
+import ConfirmAlert from "@/components/ConfirmAlert";
 
 export default function TeacherExamDashboard({ userId }) {
   const [teacher, setTeacher] = useState(null);
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [selectedCourseId, setSelectedCourseId] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const router = useRouter();
 
@@ -72,6 +75,30 @@ export default function TeacherExamDashboard({ userId }) {
 
     fetchExams();
   }, [userId]);
+
+  const handleRemoveCourse = async () => {
+    try {
+      const res = await fetch(
+        `http://localhost:4000/api/teacher/${userId}/course/${selectedCourseId}`,
+        { method: "DELETE" }
+      );
+      const data = await res.json();
+
+      if (data.success) {
+        setCourses((prev) =>
+          prev.filter((course) => course._id !== selectedCourseId)
+        );
+      } else {
+        alert("Failed to remove the course.");
+      }
+    } catch (err) {
+      console.error("Error:", err);
+      alert("An error occurred while removing the course.");
+    } finally {
+      setConfirmOpen(false);
+      setSelectedCourseId(null);
+    }
+  };
 
   const examCounts = exams.reduce((acc, exam) => {
     acc[exam.course._id] = (acc[exam.course._id] || 0) + 1;
@@ -131,7 +158,7 @@ export default function TeacherExamDashboard({ userId }) {
                 <Box className="flex items-center gap-2">
                   <PersonIcon fontSize="small" className="text-indigo-600" />
                   <Typography variant="body2" className="text-gray-600">
-                    {course.students ? course.students : 0} Students
+                    {course.students?.length || 0} Students
                   </Typography>
                 </Box>
                 <Box className="flex items-center gap-2">
@@ -155,24 +182,27 @@ export default function TeacherExamDashboard({ userId }) {
                 <Button
                   variant="contained"
                   size="small"
-                  color="primary"
-                  className="w-full bg-gradient-to-r from-purple-500 to-purple-700 text-white"
-                >
-                  Edit
-                </Button>
-                <Button
-                  variant="contained"
-                  size="small"
                   color="error"
                   className="w-full bg-gradient-to-r from-pink-500 to-pink-700 text-white"
+                  onClick={() => {
+                    setSelectedCourseId(course._id);
+                    setConfirmOpen(true);
+                  }}
                 >
-                  Delete
+                  Remove Course
                 </Button>
               </Box>
             </CardContent>
           </Card>
         ))}
       </Box>
+      <ConfirmAlert
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleRemoveCourse}
+        title="Remove Course"
+        description="Are you sure you want to remove this course from your teaching list?"
+      />
     </Container>
   );
 }

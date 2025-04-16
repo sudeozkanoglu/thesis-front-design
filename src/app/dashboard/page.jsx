@@ -67,7 +67,8 @@ const DashboardLayout = () => {
           return {
             id: exam._id,
             subject: exam.examName,
-            fullDate: start.toISOString(), // 🌟 EKLENEN ALAN
+            courseName: exam.course?.courseName || "No Course Name",
+            fullDate: start.toISOString(),
             time: start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             endTime: end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
             color:

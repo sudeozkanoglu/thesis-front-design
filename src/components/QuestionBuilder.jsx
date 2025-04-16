@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Trash2,
@@ -23,25 +23,62 @@ const QuestionBuilder = ({ examId }) => {
     { text: "", answer: "", showAnswer: false },
   ]);
 
+  // Fetch existing exam + questions
+  useEffect(() => {
+    const fetchExam = async () => {
+      try {
+        const res = await fetch(`http://localhost:4000/api/exams/${examId}`);
+        const data = await res.json();
+
+        if (data.success && data.exam) {
+          const qList = data.exam.questions.map((q) => ({
+            text: q.questionText,
+            answer: q.correctAnswer,
+            showAnswer: true,
+            _id: q._id,
+          }));
+          setQuestions(
+            qList.length > 0
+              ? qList
+              : [{ text: "", answer: "", showAnswer: false }]
+          );
+          if (data.exam.examDate) {
+            setExamDate(new Date(data.exam.examDate));
+          }
+          if (data.exam.duration) {
+            setExamTime({
+              hours: Math.floor(data.exam.duration / 60),
+              minutes: data.exam.duration % 60,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error loading exam:", error);
+      }
+    };
+
+    if (examId) fetchExam();
+  }, [examId]);
+
   const addQuestion = () => {
     setQuestions([...questions, { text: "", answer: "", showAnswer: false }]);
   };
 
   const removeQuestion = (index) => {
-    const newQuestions = questions.filter((_, i) => i !== index);
-    setQuestions(newQuestions);
+    const updated = questions.filter((_, i) => i !== index);
+    setQuestions(updated);
   };
 
   const updateQuestion = (index, key, value) => {
-    const newQuestions = [...questions];
-    newQuestions[index][key] = value;
-    setQuestions(newQuestions);
+    const updated = [...questions];
+    updated[index][key] = value;
+    setQuestions(updated);
   };
 
   const toggleAnswer = (index) => {
-    const newQuestions = [...questions];
-    newQuestions[index].showAnswer = !newQuestions[index].showAnswer;
-    setQuestions(newQuestions);
+    const updated = [...questions];
+    updated[index].showAnswer = !updated[index].showAnswer;
+    setQuestions(updated);
   };
 
   const handleSubmit = async () => {
@@ -51,75 +88,61 @@ const QuestionBuilder = ({ examId }) => {
     }
 
     if (!examDate || (examTime.hours === 0 && examTime.minutes === 0)) {
-      alert("Exam date and duration are required.");
+      alert("Please select an exam date and duration.");
       return;
     }
 
-    const questionData = questions.map((item) => ({
-      questionText: item.text,
-      correctAnswer: item.answer,
+    const payload = questions.map((q) => ({
+      questionText: q.text,
+      correctAnswer: q.answer,
       explanation: "",
     }));
 
-    if (questionData.some((q) => !q.questionText || !q.correctAnswer)) {
-      alert("All questions must have text and an answer.");
+    if (payload.some((q) => !q.questionText || !q.correctAnswer)) {
+      alert("Please fill in all question texts and answers.");
       return;
     }
 
     try {
       setLoading(true);
 
-      // Step 1: Add questions to the database
-      const questionResponse = await fetch(
-        "http://localhost:4000/api/questions/add",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            exam: examId,
-            questions: questionData,
-          }),
-        }
-      );
+      // Step 1: Add questions
+      const res1 = await fetch("http://localhost:4000/api/questions/add", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ exam: examId, questions: payload }),
+      });
 
-      const questionResult = await questionResponse.json();
-
-      if (!questionResult.success) {
-        alert(`Error adding questions: ${questionResult.message}`);
+      const result1 = await res1.json();
+      if (!result1.success) {
+        alert("Failed to add questions: " + result1.message);
         return;
       }
 
-      const addedQuestionIds = questionResult.questions.map((q) => q._id);
+      const questionIds = result1.questions.map((q) => q._id);
 
-      // Step 2: Update the exam with the new date, duration, and question IDs
-      const examUpdateResponse = await fetch(
-        `http://localhost:4000/api/exams/${examId}`,
-        {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            examDate: examDate,
-            duration: examTime.hours * 60 + examTime.minutes, // Convert to total minutes
-            questions: addedQuestionIds,
-          }),
-        }
-      );
+      // Step 2: Update exam
+      const res2 = await fetch(`http://localhost:4000/api/exams/${examId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          examDate,
+          duration: examTime.hours * 60 + examTime.minutes,
+          questions: questionIds,
+        }),
+      });
 
-      const examUpdateResult = await examUpdateResponse.json();
-
-      if (examUpdateResult.success) {
-        alert("Exam and questions updated successfully.");
-        router.push(`/lessonView/${examId}`);
-      } else {
-        alert(`Error updating exam: ${examUpdateResult.message}`);
+      const result2 = await res2.json();
+      if (!result2.success) {
+        alert("Failed to update exam: " + result2.message);
+        return;
       }
-    } catch (error) {
-      console.error("Error submitting data:", error);
-      alert("An error occurred while submitting.");
+
+      alert("Exam updated successfully!");
+      router.push(`/lessonView/${examId}`);
+    } catch (err) {
+      console.error("Submission failed:", err);
+      alert("An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
@@ -132,126 +155,124 @@ const QuestionBuilder = ({ examId }) => {
           Create Exam Questions
         </h1>
 
+        {/* Time and Date */}
         <Card className="bg-slate-50 shadow-lg">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-6 justify-center">
-              {/* Exam Time */}
-              <div className="flex gap-4 items-center">
-                <Clock className="h-5 w-5 text-black" />
-                <TextField
-                  id="outlined-number"
-                  label="Minutes"
-                  type="number"
-                  value={examTime.minutes}
-                  onChange={(e) =>
-                    setExamTime({
-                      ...examTime,
-                      minutes: Number(e.target.value),
-                    })
-                  }
-                  inputProps={{ min: 0 }}
-                />
-              </div>
-
-              {/* Exam Date */}
-              <div className="flex gap-4 items-center">
-                <DatePicker
-                  label="Exam Date"
-                  value={examDate}
-                  onChange={(newDate) => setExamDate(newDate)}
-                  renderInput={(params) => <TextField {...params} />}
-                />
-              </div>
+          <CardContent className="p-6 flex items-center justify-between gap-6">
+            <div className="flex items-center gap-4">
+              <Clock className="h-5 w-5 text-black" />
+              <TextField
+                label="Minutes"
+                type="number"
+                value={examTime.minutes}
+                onChange={(e) =>
+                  setExamTime({ ...examTime, minutes: Number(e.target.value) })
+                }
+              />
+            </div>
+            <div>
+              <DatePicker
+                label="Exam Date"
+                value={examDate}
+                onChange={(newDate) => setExamDate(newDate)}
+                renderInput={(params) => <TextField {...params} />}
+              />
             </div>
           </CardContent>
         </Card>
 
-        {questions.map((item, index) => (
-          <Card key={index} className="bg-slate-50 shadow-lg">
+        {/* Question Cards */}
+        {questions.map((q, idx) => (
+          <Card key={idx} className="bg-slate-50 shadow-md">
             <CardContent className="p-6">
-              <div className="flex items-start gap-4 ">
-                <span className="flex items-center justify-center w-10 h-10 mt-10 rounded-full bg-blue-100 text-blue-600 font-semibold">
-                  {index + 1}
-                </span>
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-semibold">
+                  {idx + 1}
+                </div>
                 <div className="flex-1">
                   <TextField
-                    value={item.text}
-                    onChange={(e) =>
-                      updateQuestion(index, "text", e.target.value)
-                    }
+                    fullWidth
                     multiline
                     rows={4}
-                    fullWidth
-                    placeholder="Add Question"
+                    placeholder="Enter the question"
+                    value={q.text}
+                    onChange={(e) =>
+                      updateQuestion(idx, "text", e.target.value)
+                    }
                   />
                   <Button
-                    variant="ghost"
-                    onClick={() => toggleAnswer(index)}
-                    className="mt-2 flex items-center gap-2 text-blue-600 hover:text-blue-800"
+                    className="mt-2 text-blue-600 hover:underline"
+                    onClick={() => toggleAnswer(idx)}
                   >
-                    {item.showAnswer ? (
-                      <ChevronUp className="mr-2" />
+                    {q.showAnswer ? (
+                      <>
+                        <ChevronUp className="mr-2" /> Hide Answer
+                      </>
                     ) : (
-                      <ChevronDown className="mr-2" />
+                      <>
+                        <ChevronDown className="mr-2" /> Add Answer
+                      </>
                     )}
-                    {item.showAnswer ? "Hide Answer" : "Add Answer"}
                   </Button>
                 </div>
                 {questions.length > 1 && (
-                  <Button
-                    variant="ghost"
-                    size="small"
-                    onClick={() => removeQuestion(index)}
-                  >
-                    <Trash2 className="h-5 w-5 text-red-500 mt-12" />
+                  <Button onClick={() => removeQuestion(idx)} className="mt-10">
+                    <Trash2 className="text-red-500" />
                   </Button>
                 )}
               </div>
-              {item.showAnswer && (
-                <div className="mt-4">
-                  <div className="flex items-center gap-4">
-                    <span className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 font-semibold">
-                      A
-                    </span>
-                    <TextField
-                      value={item.answer}
-                      onChange={(e) =>
-                        updateQuestion(index, "answer", e.target.value)
-                      }
-                      placeholder="Type the answer here..."
-                      multiline
-                      rows={3}
-                      fullWidth
-                      variant="outlined"
-                    />
-                  </div>
+              {q.showAnswer && (
+                <div className="mt-4 pl-14">
+                  <TextField
+                    fullWidth
+                    multiline
+                    rows={2}
+                    placeholder="Type the answer here..."
+                    value={q.answer}
+                    onChange={(e) =>
+                      updateQuestion(idx, "answer", e.target.value)
+                    }
+                  />
                 </div>
               )}
             </CardContent>
           </Card>
         ))}
 
-        <div className="flex justify-between pt-4">
+        {/* Actions */}
+        <div className="flex justify-between items-center pt-4">
+          {/* Back Button (sola yaslı) */}
           <Button
-            onClick={addQuestion}
-            variant="contained"
-            color="primary"
+            variant="outlined"
+            color="secondary"
+            onClick={() => router.back()}
             className="flex items-center gap-2"
           >
-            <Plus className="h-4 w-4" />
-            Add Question
+            ← Back
           </Button>
 
-          <Button
-            onClick={handleSubmit}
-            variant="contained"
-            color="success"
-            className="flex items-center gap-2"
-            disabled={loading}
-          >
-            <CheckCheck className="h-4 w-4" />
-            {loading ? "Submitting..." : "Complete Adding Questions"}
-          </Button>
+          {/* Right side buttons */}
+          <div className="flex gap-2">
+            <Button
+              onClick={addQuestion}
+              variant="contained"
+              color="primary"
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Add Question
+            </Button>
+
+            <Button
+              onClick={handleSubmit}
+              variant="contained"
+              color="success"
+              className="flex items-center gap-2"
+              disabled={loading}
+            >
+              <CheckCheck className="h-4 w-4" />
+              {loading ? "Submitting..." : "Complete Adding Questions"}
+            </Button>
+          </div>
         </div>
       </div>
     </LocalizationProvider>

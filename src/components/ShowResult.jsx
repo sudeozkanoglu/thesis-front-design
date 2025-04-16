@@ -1,5 +1,5 @@
 import React from "react";
-import { Card, CardContent } from "@mui/material";
+import { Card, CardContent, Button } from "@mui/material";
 import CardHeader from "@mui/material/CardHeader";
 import { Check, X, Clock, Brain, Target, Award, BookOpen } from "lucide-react";
 import {
@@ -17,8 +17,11 @@ import {
   Cell,
   Legend,
 } from "recharts";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { useRouter } from "next/navigation";
 
 const ShowResult = () => {
+  const router = useRouter();
   const mockResults = {
     examName: "Midterm Examination",
     studentScore: 85,
@@ -28,41 +31,56 @@ const ShowResult = () => {
     questions: [
       {
         id: 1,
-        question: "Artificial intelligence (AI) is revolutionizing industries by enabling machines to learn and adapt to complex tasks. From natural language processing to image recognition, AI systems are designed to mimic human intelligence. These technologies are now being widely used in healthcare, finance, and autonomous vehicles, making processes faster and more efficient.",
-        studentAnswer: "Yapay zeka (AI), makinelerin öğrenmesini ve karmaşık görevleri gerçekleştirmesini sağlayarak endüstrileri dönüştürüyor. Doğal dil işleme ve görüntü tanıma gibi alanlarda yapay zeka sistemleri, insan zekasını taklit etmek üzere tasarlanmıştır. Bu teknolojiler, süreçleri daha hızlı ve verimli hale getirerek sağlık, finans ve otonom araçlar gibi birçok sektörde yaygın bir şekilde kullanılmaktadır.",
-        correctAnswer: "Yapay zeka (AI), makinelerin öğrenmesini ve karmaşık görevleri gerçekleştirmesini sağlayarak endüstrileri dönüştürüyor. Doğal dil işleme ve görüntü tanıma gibi alanlarda yapay zeka sistemleri, insan zekasını taklit etmek üzere tasarlanmıştır. Bu teknolojiler, süreçleri daha hızlı ve verimli hale getirerek sağlık, finans ve otonom araçlar gibi birçok sektörde yaygın bir şekilde kullanılmaktadır.",
+        question:
+          "Artificial intelligence (AI) is revolutionizing industries by enabling machines to learn and adapt to complex tasks. From natural language processing to image recognition, AI systems are designed to mimic human intelligence. These technologies are now being widely used in healthcare, finance, and autonomous vehicles, making processes faster and more efficient.",
+        studentAnswer:
+          "Yapay zeka (AI), makinelerin öğrenmesini ve karmaşık görevleri gerçekleştirmesini sağlayarak endüstrileri dönüştürüyor. Doğal dil işleme ve görüntü tanıma gibi alanlarda yapay zeka sistemleri, insan zekasını taklit etmek üzere tasarlanmıştır. Bu teknolojiler, süreçleri daha hızlı ve verimli hale getirerek sağlık, finans ve otonom araçlar gibi birçok sektörde yaygın bir şekilde kullanılmaktadır.",
+        correctAnswer:
+          "Yapay zeka (AI), makinelerin öğrenmesini ve karmaşık görevleri gerçekleştirmesini sağlayarak endüstrileri dönüştürüyor. Doğal dil işleme ve görüntü tanıma gibi alanlarda yapay zeka sistemleri, insan zekasını taklit etmek üzere tasarlanmıştır. Bu teknolojiler, süreçleri daha hızlı ve verimli hale getirerek sağlık, finans ve otonom araçlar gibi birçok sektörde yaygın bir şekilde kullanılmaktadır.",
         isCorrect: true,
         timeSpent: 8,
       },
       {
         id: 2,
-        question: "Network security is a critical aspect of modern computing, ensuring that sensitive data is protected from unauthorized access. Firewalls, encryption, and intrusion detection systems are some of the tools used to safeguard networks. As cyber threats continue to evolve, maintaining robust security protocols has become essential for organizations.",
-        studentAnswer: "Ağ güvenliği, modern bilişimin kritik bir unsurudur ve hassas verilerin yetkisiz erişimden korunmasını sağlar. Güvenlik duvarları, şifreleme ve izinsiz giriş tespit sistemleri, ağları korumak için kullanılan araçlardan bazılarıdır. Siber tehditler evrildikçe, güçlü güvenlik protokollerini sürdürmek, organizasyonlar için zorunlu hale gelmiştir.",
-        correctAnswer: "Ağ güvenliği, modern bilişimin kritik bir unsurudur ve hassas verilerin yetkisiz erişimden korunmasını sağlar. Güvenlik duvarları, şifreleme ve izinsiz giriş tespit sistemleri, ağları korumak için kullanılan araçlardan bazılarıdır. Siber tehditler evrildikçe, güçlü güvenlik protokollerini sürdürmek, organizasyonlar için zorunlu hale gelmiştir.",
+        question:
+          "Network security is a critical aspect of modern computing, ensuring that sensitive data is protected from unauthorized access. Firewalls, encryption, and intrusion detection systems are some of the tools used to safeguard networks. As cyber threats continue to evolve, maintaining robust security protocols has become essential for organizations.",
+        studentAnswer:
+          "Ağ güvenliği, modern bilişimin kritik bir unsurudur ve hassas verilerin yetkisiz erişimden korunmasını sağlar. Güvenlik duvarları, şifreleme ve izinsiz giriş tespit sistemleri, ağları korumak için kullanılan araçlardan bazılarıdır. Siber tehditler evrildikçe, güçlü güvenlik protokollerini sürdürmek, organizasyonlar için zorunlu hale gelmiştir.",
+        correctAnswer:
+          "Ağ güvenliği, modern bilişimin kritik bir unsurudur ve hassas verilerin yetkisiz erişimden korunmasını sağlar. Güvenlik duvarları, şifreleme ve izinsiz giriş tespit sistemleri, ağları korumak için kullanılan araçlardan bazılarıdır. Siber tehditler evrildikçe, güçlü güvenlik protokollerini sürdürmek, organizasyonlar için zorunlu hale gelmiştir.",
         isCorrect: true,
         timeSpent: 5,
       },
       {
         id: 3,
-        question: "Programming languages are the backbone of software development. Each language, such as Python, Java, or C++, has unique features suited for specific applications. For instance, Python is popular for machine learning and data analysis, while C++ is often used in game development and system programming.",
-        studentAnswer: "Programlama dilleri, yazılım geliştirmenin temelini oluşturur. Python, Java veya C++ gibi her bir dil, belirli uygulamalar için uygun olan benzersiz özelliklere sahiptir. Örneğin, Python, makine öğrenimi ve veri analizi için popülerken, C++ genellikle oyun geliştirme ve sistem programlamasında kullanılmaktadır.",
-        correctAnswer: "Programlama dilleri, yazılım geliştirmenin temelini oluşturur. Python, Java veya C++ gibi her bir dil, belirli uygulamalar için uygun olan benzersiz özelliklere sahiptir. Örneğin, Python, makine öğrenimi ve veri analizi için popülerken, C++ genellikle oyun geliştirme ve sistem programlamasında kullanılmaktadır.",
+        question:
+          "Programming languages are the backbone of software development. Each language, such as Python, Java, or C++, has unique features suited for specific applications. For instance, Python is popular for machine learning and data analysis, while C++ is often used in game development and system programming.",
+        studentAnswer:
+          "Programlama dilleri, yazılım geliştirmenin temelini oluşturur. Python, Java veya C++ gibi her bir dil, belirli uygulamalar için uygun olan benzersiz özelliklere sahiptir. Örneğin, Python, makine öğrenimi ve veri analizi için popülerken, C++ genellikle oyun geliştirme ve sistem programlamasında kullanılmaktadır.",
+        correctAnswer:
+          "Programlama dilleri, yazılım geliştirmenin temelini oluşturur. Python, Java veya C++ gibi her bir dil, belirli uygulamalar için uygun olan benzersiz özelliklere sahiptir. Örneğin, Python, makine öğrenimi ve veri analizi için popülerken, C++ genellikle oyun geliştirme ve sistem programlamasında kullanılmaktadır.",
         isCorrect: true,
         timeSpent: 12,
       },
       {
         id: 4,
-        question: "Big data refers to the massive volume of data generated by digital devices and online platforms. Analyzing this data helps organizations gain insights into customer behavior, optimize operations, and make informed decisions. Tools like Hadoop and Spark are widely used to process and analyze big data efficiently",
-        studentAnswer: "Büyük veri, dijital cihazlar ve çevrimiçi platformlar tarafından üretilen devasa veri hacmini ifade eder. Bu verilerin analiz edilmesi, organizasyonların müşteri davranışlarını anlamalarına, operasyonlarını optimize etmelerine ve bilinçli kararlar almalarına yardımcı olur. Hadoop ve Spark gibi araçlar, büyük veriyi verimli bir şekilde işlemek ve analiz etmek için yaygın olarak kullanılmaktadır.",
-        correctAnswer: "Büyük veri, dijital cihazlar ve çevrimiçi platformlar tarafından üretilen devasa veri hacmini ifade eder. Bu verilerin analiz edilmesi, organizasyonların müşteri davranışlarını anlamalarına, operasyonlarını optimize etmelerine ve bilinçli kararlar almalarına yardımcı olur. Hadoop ve Spark gibi araçlar, büyük veriyi verimli bir şekilde işlemek ve analiz etmek için yaygın olarak kullanılmaktadır.",
+        question:
+          "Big data refers to the massive volume of data generated by digital devices and online platforms. Analyzing this data helps organizations gain insights into customer behavior, optimize operations, and make informed decisions. Tools like Hadoop and Spark are widely used to process and analyze big data efficiently",
+        studentAnswer:
+          "Büyük veri, dijital cihazlar ve çevrimiçi platformlar tarafından üretilen devasa veri hacmini ifade eder. Bu verilerin analiz edilmesi, organizasyonların müşteri davranışlarını anlamalarına, operasyonlarını optimize etmelerine ve bilinçli kararlar almalarına yardımcı olur. Hadoop ve Spark gibi araçlar, büyük veriyi verimli bir şekilde işlemek ve analiz etmek için yaygın olarak kullanılmaktadır.",
+        correctAnswer:
+          "Büyük veri, dijital cihazlar ve çevrimiçi platformlar tarafından üretilen devasa veri hacmini ifade eder. Bu verilerin analiz edilmesi, organizasyonların müşteri davranışlarını anlamalarına, operasyonlarını optimize etmelerine ve bilinçli kararlar almalarına yardımcı olur. Hadoop ve Spark gibi araçlar, büyük veriyi verimli bir şekilde işlemek ve analiz etmek için yaygın olarak kullanılmaktadır.",
         isCorrect: true,
         timeSpent: 7,
       },
       {
         id: 5,
-        question: "Cloud computing has transformed the way businesses manage their IT infrastructure. By storing data and applications on remote servers, organizations can access resources on demand, reduce costs, and improve scalability. Cloud services like Amazon Web Services (AWS) and Microsoft Azure are leading this technological shift.",
-        studentAnswer: "Bulut bilişim, işletmelerin fiziksel depolama cihazlarını tamamen ortadan kaldırmasına neden olur. Veriler ve uygulamalar uzak sunucularda saklandığından, organizasyonlar bu kaynaklara nadiren erişebilir. Amazon Web Services (AWS) ve Microsoft Azure gibi bulut hizmetleri, çoğunlukla bireylerin kişisel kullanımına yöneliktir ve büyük ölçekli işletmeler için uygun değildir.",
-        correctAnswer: "Bulut bilişim, işletmelerin BT altyapılarını yönetme biçimini dönüştürmüştür. Verilerin ve uygulamaların uzak sunucularda saklanmasıyla, organizasyonlar bu kaynaklara ihtiyaç duyduklarında erişebilir, maliyetlerini azaltabilir ve ölçeklenebilirliklerini artırabilir. Amazon Web Services (AWS) ve Microsoft Azure gibi bulut hizmetleri, bu teknolojik değişimin öncüsü olmuştur.",
+        question:
+          "Cloud computing has transformed the way businesses manage their IT infrastructure. By storing data and applications on remote servers, organizations can access resources on demand, reduce costs, and improve scalability. Cloud services like Amazon Web Services (AWS) and Microsoft Azure are leading this technological shift.",
+        studentAnswer:
+          "Bulut bilişim, işletmelerin fiziksel depolama cihazlarını tamamen ortadan kaldırmasına neden olur. Veriler ve uygulamalar uzak sunucularda saklandığından, organizasyonlar bu kaynaklara nadiren erişebilir. Amazon Web Services (AWS) ve Microsoft Azure gibi bulut hizmetleri, çoğunlukla bireylerin kişisel kullanımına yöneliktir ve büyük ölçekli işletmeler için uygun değildir.",
+        correctAnswer:
+          "Bulut bilişim, işletmelerin BT altyapılarını yönetme biçimini dönüştürmüştür. Verilerin ve uygulamaların uzak sunucularda saklanmasıyla, organizasyonlar bu kaynaklara ihtiyaç duyduklarında erişebilir, maliyetlerini azaltabilir ve ölçeklenebilirliklerini artırabilir. Amazon Web Services (AWS) ve Microsoft Azure gibi bulut hizmetleri, bu teknolojik değişimin öncüsü olmuştur.",
         isCorrect: false,
         timeSpent: 13,
       },
@@ -94,6 +112,16 @@ const ShowResult = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <div className="pb-2 pt-4 px-6 flex items-center justify-between">
+        <Button
+          variant="outlined"
+          color="secondary"
+          startIcon={<ArrowBackIcon />}
+          onClick={() => router.back()}
+        >
+          Back
+        </Button>
+      </div>
       <div className="grid grid-cols-2 gap-6 p-6">
         {/* Left side - Results */}
         <div className="space-y-6">
