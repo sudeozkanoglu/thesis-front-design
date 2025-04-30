@@ -6,35 +6,41 @@ import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
 import ExamStatistics from "@/components/ExamStatistics";
 import TeacherExamDashboard from "@/components/TeacherExamDashboard";
+import TextToSpeechButton from "../../components/TextToSpeechButton";
 
 const TeacherExamLayout = () => {
   const [activeLink, setActiveLink] = useState("Exams");
   const [userId, setUserId] = useState(null);
 
   useEffect(() => {
-    if (typeof window !== "undefined") { 
+    if (typeof window !== "undefined") {
       const storedUserId = localStorage.getItem("userId");
       setUserId(storedUserId);
     }
   }, []);
 
   return (
-        <div className="min-h-screen bg-slate-100">
-        <Navbar />
-        <div className="pt-24 px-4 flex gap-4">
-            {/* Left Column */}
-            <div className="w-64 flex flex-col gap-4">
-            <Sidebar activeLink={activeLink} setActiveLink={setActiveLink} />
-            <ExamStatistics />
-            </div>
+    <div className="min-h-screen bg-slate-100">
+      <Navbar />
+      <div className="pt-24 px-4 flex gap-4">
+        {/* Left Column */}
+        <div className="w-64 flex flex-col gap-4">
+          <Sidebar activeLink={activeLink} setActiveLink={setActiveLink} />
+          <ExamStatistics />
+        </div>
 
-            {/* Right Column */}
-            <div className="flex-1 bg-white rounded-lg shadow-md p-6">
-            {userId && <TeacherExamDashboard userId={userId} />}
-            </div>
+        {/* Right Column */}
+        <div className="flex-1 bg-white rounded-lg shadow-md p-6">
+          {userId && <TeacherExamDashboard userId={userId} />}
         </div>
-        <Footer />
-        </div>
+      </div>
+      <div className="p-4">
+        <h1 className="text-xl mb-4">Sınav Sayfası</h1>
+        <TextToSpeechButton />
+      </div>
+
+      <Footer />
+    </div>
   );
 };
 

@@ -90,25 +90,23 @@ const ExamLayout = () => {
           <div className="flex flex-col gap-6 p-6">
             {sortedExams.map((exam) => {
               const now = new Date();
-              const examStartTime = new Date(exam.examDate);
-              const examEndTime = new Date(exam.examDate);
-              examEndTime.setMinutes(
-                examEndTime.getMinutes() + (exam.duration || 0)
-              );
-
-              const isBeforeExamStart = now < examStartTime;
-              const isAfterExamEnd = now > examEndTime;
+              const examDate = new Date(exam.examDate);
+              const isValidDate = exam.examDate && examDate.getTime() > 0;
 
               let buttonText = "Start Exam";
               let isButtonDisabled = false;
               let buttonClasses =
                 "bg-blue-950 text-white hover:bg-blue-800 cursor-pointer";
 
-              if (exam.status === "completed" || isAfterExamEnd) {
+              if (!isValidDate) {
+                buttonText = "Start Exam";
+                isButtonDisabled = true;
+                buttonClasses = "bg-gray-400 text-gray-200 cursor-not-allowed";
+              } else if (exam.status === "completed") {
                 buttonText = "Show Result";
                 isButtonDisabled = false;
                 buttonClasses = "bg-green-600 text-white hover:bg-green-700";
-              } else if (isBeforeExamStart) {
+              } else if (examDate > new Date()) {
                 buttonText = "Start Exam";
                 isButtonDisabled = true;
                 buttonClasses = "bg-gray-400 text-gray-200 cursor-not-allowed";
@@ -117,12 +115,13 @@ const ExamLayout = () => {
               const handleButtonClick = () => {
                 if (buttonText === "Show Result") {
                   router.push("/showResult");
-                } else if (buttonText === "Start Exam") {
-                  router.push("/examInterface");
+                } else if (buttonText === "Start Exam" && !isButtonDisabled) {
+                  router.push(`/examInterface/${exam._id}`);
                 }
               };
 
-              const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1);
+              const capitalize = (text) =>
+                text.charAt(0).toUpperCase() + text.slice(1);
 
               return (
                 <Card key={exam._id} className="shadow-md bg-gray-50">
@@ -142,16 +141,9 @@ const ExamLayout = () => {
                       </span>
                     </div>
                     <p className="text-gray-600 mb-4">
-                      {examStartTime.toLocaleDateString()} -{" "}
-                      {examStartTime.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}{" "}
-                      to{" "}
-                      {examEndTime.toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {isValidDate
+                        ? `Exam Date: ${examDate.toLocaleDateString()}`
+                        : "Exam Date: Not set"}
                     </p>
                     <button
                       className={`w-full p-2 rounded-md font-semibold ${buttonClasses}`}
