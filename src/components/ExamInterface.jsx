@@ -12,21 +12,52 @@ import {
 import StaticAudioWaveform from "@/components/StaticAudioWaveform";
 import { useRouter } from "next/navigation";
 
-const AudioExamInterface = ({ questions = [], duration }) => {
+const AudioExamInterface = ({ questions = [], duration, exam, student }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [timeLeft, setTimeLeft] = useState(() => duration * 60);
   const [isRecording, setIsRecording] = useState(false);
   const videoRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const [recordings, setRecordings] = useState({});
-
+  const [recordingBlobs, setRecordingBlobs] = useState({});
   const router = useRouter();
+  const [recordingDuration, setRecordingDuration] = useState(0);
 
   // Added the missing formatTime function
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
     return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
+  };
+
+  const submitAnswer = async () => {
+    const blob = recordingBlobs[currentQuestion];
+    if (!blob) return alert("No recording found for this question!");
+
+    const formData = new FormData();
+    formData.append("audio", blob);
+    formData.append("examId", exam); // props veya context ile alınmalı
+    formData.append("studentId", student); // localStorage veya context ile alınmalı
+    formData.append("questionId", questions[currentQuestion]._id);
+    formData.append("language", questions[currentQuestion].language || "tr");
+
+    try {
+      const res = await fetch("http://localhost:4000/api/stt/submit", {
+        method: "POST",
+        body: formData,
+      });
+
+      console.log("📤 Form submitted to /api/stt/submit");
+
+      const data = await res.json();
+      if (data.success) {
+        console.log("Transkript:", data.transcript);
+      } else {
+        console.error("STT başarısız:", data.error);
+      }
+    } catch (err) {
+      console.error("STT API error:", err);
+    }
   };
 
   useEffect(() => {
@@ -39,6 +70,22 @@ const AudioExamInterface = ({ questions = [], duration }) => {
       router.push("/exam");
     }
   }, [timeLeft]);
+
+  useEffect(() => {
+    let interval;
+  
+    if (isRecording) {
+      const start = Date.now(); 
+      interval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - start) / 1000);
+        setRecordingDuration(elapsed);
+      }, 1000);
+    } else {
+      setRecordingDuration(0);
+    }
+  
+    return () => clearInterval(interval);
+  }, [isRecording]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -60,10 +107,18 @@ const AudioExamInterface = ({ questions = [], duration }) => {
       mediaRecorderRef.current.ondataavailable = (e) => chunks.push(e.data);
       mediaRecorderRef.current.onstop = () => {
         const blob = new Blob(chunks, { type: "video/webm" });
-        setRecordings({
-          ...recordings,
+
+        // URL for preview
+        setRecordings((prev) => ({
+          ...prev,
           [currentQuestion]: URL.createObjectURL(blob),
-        });
+        }));
+
+        // Blob for backend
+        setRecordingBlobs((prev) => ({
+          ...prev,
+          [currentQuestion]: blob,
+        }));
       };
 
       mediaRecorderRef.current.start();
@@ -120,6 +175,13 @@ const AudioExamInterface = ({ questions = [], duration }) => {
           {/* Video Recording Section */}
           <div className="mt-8">
             <div className="aspect-video bg-slate-100 rounded-lg overflow-hidden mb-4 relative">
+              {isRecording && (
+                <div className="absolute top-2 right-2 bg-red-600 text-white px-3 py-1 rounded-full flex items-center gap-2 text-sm shadow-lg z-10">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                  REC – {formatTime(recordingDuration)}
+                </div>
+              )}
+
               {!isRecording && !recordings[currentQuestion] && (
                 <div className="flex flex-col items-center justify-center w-full h-full bg-slate-200 text-slate-700 text-center px-4">
                   <Video className="w-10 h-10 mb-2" />
@@ -131,6 +193,7 @@ const AudioExamInterface = ({ questions = [], duration }) => {
                   </p>
                 </div>
               )}
+
               <video
                 ref={videoRef}
                 className="w-full h-full object-cover"
@@ -181,18 +244,23 @@ const AudioExamInterface = ({ questions = [], duration }) => {
           {currentQuestion === questions.length - 1 ? (
             <button
               className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
-              onClick={() => router.push("/exam")}
+              onClick={() => {
+                submitAnswer();
+                console.log("📤 Form submitted to /api/stt/submit");
+                router.push("/exam");
+              }}
             >
               <Check className="w-5 h-5" />
               Submit Exam
             </button>
           ) : (
             <button
-              onClick={() =>
+              onClick={() => {
+                submitAnswer();
                 setCurrentQuestion((prev) =>
                   Math.min(questions.length - 1, prev + 1)
-                )
-              }
+                );
+              }}
               className="flex items-center gap-2 px-4 py-2 rounded-md bg-blue-800 hover:bg-blue-600"
             >
               Next

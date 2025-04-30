@@ -1,45 +1,28 @@
 "use client"; // Eğer Next.js 13 ve üstü kullanıyorsanız etkileşimli sayfa bileşenlerinde gereklidir
 
-import React from "react";
+import React, {useEffect, useState} from "react";
 
-const ExamResults = () => {
-  const examResults = [
-    {
-      id: 1,
-      exam: "English for Literature",
-      score: 95,
-      date: "2024-12-20",
-      time: "10:00 AM",
-    },
-    {
-      id: 2,
-      exam: "Medical English",
-      score: 82,
-      date: "2024-12-18",
-      time: "2:00 PM",
-    },
-    {
-      id: 3,
-      exam: "Business English",
-      score: 55,
-      date: "2024-12-15",
-      time: "11:30 AM",
-    },
-    {
-      id: 4,
-      exam: "Everyday English Conversation",
-      score: 40,
-      date: "2024-12-10",
-      time: "3:00 PM",
-    },
-    {
-      id: 5,
-      exam: "English for Digital Media",
-      score: 75,
-      date: "2024-12-05",
-      time: "1:00 PM",
-    },
-  ];
+const ExamResults = ({student}) => {
+  const [examResults, setExamResults] = useState([]);
+
+  useEffect(() => {
+    const fetchResults = async () => {
+      if (!student) return;
+      try {
+        const res = await fetch(
+          `http://localhost:4000/api/exam-submissions/${student}/latest`
+        );
+        const data = await res.json();
+        if (data.success) {
+          setExamResults(data.results);
+        }
+      } catch (err) {
+        console.error("Error loading exam results:", err);
+      }
+    };
+  
+    fetchResults();
+  }, [student]);
 
   const getScoreColor = (score) => {
     if (score > 85) return "text-green-600";
@@ -59,6 +42,7 @@ const ExamResults = () => {
           >
             <div>
               <h4 className="font-semibold text-gray-700">{result.exam}</h4>
+              <p className="text-sm text-gray-500 italic">{result.courseName}</p>
               <p className="text-sm font-semibold text-gray-500">
                 {result.date}
               </p>

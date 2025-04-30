@@ -5,9 +5,17 @@ import AudioExamInterface from "../../../components/ExamInterface";
 
 export default function ExamPage() {
   const { examId } = useParams();
+  const [studentId, setStudentId] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [duration, setDuration] = useState(30);
-  
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedId = localStorage.getItem("userId");
+      setStudentId(storedId);
+    }
+  }, []);
+
   useEffect(() => {
     if (!examId) return;
 
@@ -17,7 +25,7 @@ export default function ExamPage() {
         const data = await res.json();
         if (data.success && data.exam) {
           setQuestions(data.exam.questions || []);
-          setDuration(data.exam.duration || 30); 
+          setDuration(data.exam.duration || 30);
         }
       } catch (error) {
         console.error("Failed to fetch questions:", error);
@@ -27,5 +35,12 @@ export default function ExamPage() {
     fetchQuestions();
   }, [examId]);
 
-  return <AudioExamInterface questions={questions} duration={duration}/>;
+  return (
+    <AudioExamInterface
+      questions={questions}
+      duration={duration}
+      exam={examId}
+      student={studentId}
+    />
+  );
 }

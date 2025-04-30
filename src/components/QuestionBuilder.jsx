@@ -10,7 +10,16 @@ import {
   ChevronDown,
   ChevronUp,
 } from "lucide-react";
-import { Card, CardContent, Button, TextField } from "@mui/material";
+import {
+  Card,
+  CardContent,
+  Button,
+  TextField,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+} from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 
@@ -20,8 +29,9 @@ const QuestionBuilder = ({ examId }) => {
   const [loading, setLoading] = useState(false);
   const [examDate, setExamDate] = useState(null);
   const [questions, setQuestions] = useState([
-    { text: "", answer: "", showAnswer: false },
+    { text: "", answer: "", language: "tr", showAnswer: false },
   ]);
+
 
   // Fetch existing exam + questions
   useEffect(() => {
@@ -35,6 +45,7 @@ const QuestionBuilder = ({ examId }) => {
             text: q.questionText,
             answer: q.correctAnswer,
             showAnswer: true,
+            language: q.language || "tr",
             _id: q._id,
           }));
           setQuestions(
@@ -61,7 +72,10 @@ const QuestionBuilder = ({ examId }) => {
   }, [examId]);
 
   const addQuestion = () => {
-    setQuestions([...questions, { text: "", answer: "", showAnswer: false }]);
+    setQuestions([
+      ...questions,
+      { text: "", answer: "", language: "tr", showAnswer: false },
+    ]);
   };
 
   const removeQuestion = (index) => {
@@ -96,6 +110,7 @@ const QuestionBuilder = ({ examId }) => {
       questionText: q.text,
       correctAnswer: q.answer,
       explanation: "",
+      language: q.language || "tr",
     }));
 
     if (payload.some((q) => !q.questionText || !q.correctAnswer)) {
@@ -199,6 +214,23 @@ const QuestionBuilder = ({ examId }) => {
                       updateQuestion(idx, "text", e.target.value)
                     }
                   />
+                  <FormControl fullWidth variant="outlined" margin="normal" className="mt-4">
+                    <InputLabel id={`language-label-${idx}`}>
+                      Student Response Language
+                    </InputLabel>
+                    <Select
+                      labelId={`language-label-${idx}`}
+                      id={`language-select-${idx}`}
+                      label="Student Response Language"
+                      value={q.language || "tr"}
+                      onChange={(e) =>
+                        updateQuestion(idx, "language", e.target.value)
+                      }
+                    >
+                      <MenuItem value="tr">Turkish</MenuItem>
+                      <MenuItem value="en">English</MenuItem>
+                    </Select>
+                  </FormControl>
                   <Button
                     className="mt-2 text-blue-600 hover:underline"
                     onClick={() => toggleAnswer(idx)}

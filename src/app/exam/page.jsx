@@ -42,6 +42,42 @@ const ExamLayout = () => {
     fetchExams();
   }, [studentId]);
 
+  useEffect(() => {
+    if (!studentId) return;
+  
+    const fetchExamsAndSubmissions = async () => {
+      try {
+        const res = await fetch(
+          `http://localhost:4000/api/students/${studentId}/exams`
+        );
+        const data = await res.json();
+  
+        const examsFromServer = data.exams || [];
+  
+        // Şimdi submissions'ları getir
+        const subRes = await fetch(`http://localhost:4000/api/exam-submissions/${studentId}`);
+        const subData = await subRes.json();
+        const submittedExamIds = subData.success
+          ? subData.submissions.map((s) => s.exam)
+          : [];
+  
+        // Her exam'a isSubmitted flag'i ekle
+        const updatedExams = examsFromServer.map((exam) => ({
+          ...exam,
+          isSubmitted: submittedExamIds.includes(exam._id),
+        }));
+  
+        setExams(updatedExams);
+      } catch (err) {
+        console.error("Error fetching exams or submissions:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchExamsAndSubmissions();
+  }, [studentId]);
+
   // Sıralama:
   // 1) Başlamamış (examStartTime > now) sınavlar yukarıda.
   // 2) Biten ya da başlayan (examStartTime <= now) sınavlar aşağıda.
@@ -110,6 +146,12 @@ const ExamLayout = () => {
                 buttonText = "Start Exam";
                 isButtonDisabled = true;
                 buttonClasses = "bg-gray-400 text-gray-200 cursor-not-allowed";
+              }
+
+              if (exam.isSubmitted) {
+                buttonText = "Submitted";
+                isButtonDisabled = true;
+                buttonClasses = "bg-gray-300 text-gray-500 cursor-not-allowed";
               }
 
               const handleButtonClick = () => {
