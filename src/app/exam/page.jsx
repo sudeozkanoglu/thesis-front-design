@@ -112,7 +112,7 @@ const ExamLayout = () => {
           <Sidebar activeLink={activeLink} setActiveLink={setActiveLink} />
 
           {/* Exam Results */}
-          <ExamResult />
+          <ExamResult student={studentId} />
         </div>
 
         {/* Exams */}

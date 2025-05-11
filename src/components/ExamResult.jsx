@@ -1,4 +1,4 @@
-"use client"; // Eğer Next.js 13 ve üstü kullanıyorsanız etkileşimli sayfa bileşenlerinde gereklidir
+"use client";
 
 import React, {useEffect, useState} from "react";
 

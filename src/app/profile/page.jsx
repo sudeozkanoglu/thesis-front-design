@@ -90,7 +90,7 @@ const DashboardLayout = () => {
         {/* Sidebar */}
         <div className="w-64 flex flex-col gap-4">
           <Sidebar activeLink={activeLink} setActiveLink={setActiveLink} />
-          <ExamResult />
+          <ExamResult student={studentId} />
         </div>
 
         {/* Main */}
