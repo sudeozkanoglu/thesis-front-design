@@ -1,6 +1,6 @@
 # Thesis Front Design
 
-Bu proje, yüksek lisans tezi kapsamında geliştirilen bir web uygulamasının ön yüz (frontend) tasarımını içermektedir. Next.js, TypeScript ve Tailwind CSS kullanılarak modern ve ölçeklenebilir bir kullanıcı arayüzü oluşturulmuştur.
+Bu proje, lisans tezi kapsamında geliştirilen bir web uygulamasının ön yüz (frontend) tasarımını içermektedir. Next.js, TypeScript ve Tailwind CSS kullanılarak modern ve ölçeklenebilir bir kullanıcı arayüzü oluşturulmuştur.
 
 ## Özellikler
 
