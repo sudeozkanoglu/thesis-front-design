@@ -48,9 +48,9 @@ const ExamResults = ({student}) => {
               </p>
             </div>
             <span
-              className={`text-xl font-semibold ${getScoreColor(result.score)}`}
+              className={`text-xl font-semibold ${getScoreColor(result.overall_score)}`}
             >
-              {result.score}
+              {(result.overall_score).toFixed(2)}
             </span>
           </div>
         ))}

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { useToast } from "../context/ToastContext";
 
 const AdminNotificationForm = () => {
   const [title, setTitle] = useState("");
@@ -9,7 +10,7 @@ const AdminNotificationForm = () => {
   const [teacherId, setTeacherId] = useState("");
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
+  const { showToast } = useToast();
 
   useEffect(() => {
     const fetchTeachers = async () => {
@@ -27,7 +28,6 @@ const AdminNotificationForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatusMessage("");
     setLoading(true);
 
     const payload = {
@@ -38,25 +38,28 @@ const AdminNotificationForm = () => {
     };
 
     try {
-      const res = await fetch("http://localhost:4000/api/notifications/to-teachers", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      const res = await fetch(
+        "http://localhost:4000/api/notifications/to-teachers",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
 
       const data = await res.json();
 
       if (data.success) {
-        setStatusMessage("✅ Notification sent successfully.");
+        showToast("Notification sent successfully!", "success");
         setTitle("");
         setMessage("");
         setTeacherId("");
       } else {
-        setStatusMessage("❌ Failed to send notification.");
+        showToast("Failed to send notification.", "error");
       }
     } catch (err) {
       console.error("Error sending notification:", err);
-      setStatusMessage("❌ An unexpected error occurred.");
+      showToast("An unexpected error occurred.", "error");
     } finally {
       setLoading(false);
     }
@@ -69,9 +72,10 @@ const AdminNotificationForm = () => {
       </h2>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Title */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Title
+          </label>
           <input
             type="text"
             value={title}
@@ -82,9 +86,10 @@ const AdminNotificationForm = () => {
           />
         </div>
 
-        {/* Message */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Message</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Message
+          </label>
           <textarea
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -95,7 +100,6 @@ const AdminNotificationForm = () => {
           />
         </div>
 
-        {/* Target Toggle */}
         <div className="flex items-center gap-3">
           <input
             type="checkbox"
@@ -127,24 +131,17 @@ const AdminNotificationForm = () => {
             </select>
           </div>
         )}
-
-        {/* Submit Button */}
         <button
           type="submit"
           className={`w-full py-3 text-white font-semibold rounded-md transition duration-200 ${
-            loading ? "bg-blue-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+            loading
+              ? "bg-blue-300 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
           }`}
           disabled={loading}
         >
           {loading ? "Sending..." : "Send Notification"}
         </button>
-
-        {/* Status Message */}
-        {statusMessage && (
-          <div className="text-center text-sm text-gray-700 mt-2">
-            {statusMessage}
-          </div>
-        )}
       </form>
     </div>
   );

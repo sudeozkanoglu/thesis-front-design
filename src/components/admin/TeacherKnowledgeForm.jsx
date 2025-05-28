@@ -1,8 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useToast } from "../context/ToastContext";
 
 export default function TeacherKnowledgeForm({ existingTeacher, onClose }) {
+  const { showToast } = useToast();
   const router = useRouter();
   const [courses, setCourses] = useState([]);
   const [formData, setFormData] = useState({
@@ -160,19 +162,19 @@ export default function TeacherKnowledgeForm({ existingTeacher, onClose }) {
       const data = await response.json();
   
       if (data.success) {
-        alert(
+        showToast(
           existingTeacher
             ? "Teacher updated successfully!"
             : "Teacher added successfully!"
-        );
+        , "success");
         onClose();
         router.refresh();
       } else {
-        alert(`Error: ${data.message}`);
+        showToast(`Error: ${data.message}`, "error");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("An error occurred. Please try again.");
+      showToast("An error occurred. Please try again.", "error");
     }
   };
 

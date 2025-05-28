@@ -10,6 +10,7 @@ import TeacherProfileInterface from "@/components/TeacherProfileInterface";
 const TeacherProfile = () => {
   const [activeLink, setActiveLink] = useState("Profile");
   const [userId, setUserId] = useState(null);
+  const [latestExamId, setLatestExamId] = useState(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -18,13 +19,34 @@ const TeacherProfile = () => {
     }
   }, []);
 
+  useEffect(() => {
+      const fetchLatestCompletedExam = async () => {
+        if (!userId) return;
+  
+        try {
+          const res = await fetch(
+            `http://localhost:4000/api/exams/${userId}/latest-completed-exam`
+          );
+          const data = await res.json();
+  
+          if (data.success && data.exam) {
+            setLatestExamId(data.exam._id);
+          }
+        } catch (err) {
+          console.error("Error fetching latest completed exam:", err);
+        }
+      };
+  
+      fetchLatestCompletedExam();
+    }, [userId]);
+  
   return (
     <div className="min-h-screen bg-slate-100">
       <Navbar />
       <div className="pt-24 px-4 flex gap-4">
         <div className="w-64 flex flex-col gap-4">
           <Sidebar activeLink={activeLink} setActiveLink={setActiveLink} />
-          <ExamStatistics />
+          {latestExamId && <ExamStatistics examId={latestExamId} />}
         </div>
 
         <div className="flex-1 bg-white rounded-lg shadow-md p-6">

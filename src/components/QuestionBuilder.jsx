@@ -22,9 +22,11 @@ import {
 } from "@mui/material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { useToast } from "@/components/context/ToastContext";
 
 const QuestionBuilder = ({ examId }) => {
   const router = useRouter();
+  const { showToast } = useToast();
   const [examTime, setExamTime] = useState({ hours: 0, minutes: 0 });
   const [loading, setLoading] = useState(false);
   const [examDate, setExamDate] = useState(null);
@@ -32,8 +34,6 @@ const QuestionBuilder = ({ examId }) => {
     { text: "", answer: "", language: "tr", showAnswer: false },
   ]);
 
-
-  // Fetch existing exam + questions
   useEffect(() => {
     const fetchExam = async () => {
       try {
@@ -65,11 +65,12 @@ const QuestionBuilder = ({ examId }) => {
         }
       } catch (error) {
         console.error("Error loading exam:", error);
+        showToast("Failed to load exam", "error");
       }
     };
 
     if (examId) fetchExam();
-  }, [examId]);
+  }, [examId, showToast]);
 
   const addQuestion = () => {
     setQuestions([
@@ -97,12 +98,12 @@ const QuestionBuilder = ({ examId }) => {
 
   const handleSubmit = async () => {
     if (!examId) {
-      alert("Exam ID is required");
+      showToast("Exam ID is required", "error");
       return;
     }
 
     if (!examDate || (examTime.hours === 0 && examTime.minutes === 0)) {
-      alert("Please select an exam date and duration.");
+      showToast("Please select an exam date and duration.", "error");
       return;
     }
 
@@ -114,14 +115,13 @@ const QuestionBuilder = ({ examId }) => {
     }));
 
     if (payload.some((q) => !q.questionText || !q.correctAnswer)) {
-      alert("Please fill in all question texts and answers.");
+      showToast("Please fill in all question texts and answers.", "error");
       return;
     }
 
     try {
       setLoading(true);
 
-      // Step 1: Add questions
       const res1 = await fetch("http://localhost:4000/api/questions/add", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -130,13 +130,14 @@ const QuestionBuilder = ({ examId }) => {
 
       const result1 = await res1.json();
       if (!result1.success) {
-        alert("Failed to add questions: " + result1.message);
+        showToast("Failed to add questions: " + result1.message, "error");
         return;
       }
 
+      showToast("Questions added successfully!", "success");
+
       const questionIds = result1.questions.map((q) => q._id);
 
-      // Step 2: Update exam
       const res2 = await fetch(`http://localhost:4000/api/exams/${examId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -149,15 +150,16 @@ const QuestionBuilder = ({ examId }) => {
 
       const result2 = await res2.json();
       if (!result2.success) {
-        alert("Failed to update exam: " + result2.message);
+        showToast("Failed to update exam: " + result2.message, "error");
         return;
       }
 
-      alert("Exam updated successfully!");
-      router.push(`/lessonView/${examId}`);
+      showToast("Exam updated successfully!", "success");
+
+      router.push("/teacher/teacherExam");
     } catch (err) {
       console.error("Submission failed:", err);
-      alert("An unexpected error occurred.");
+      showToast("An unexpected error occurred.", "error");
     } finally {
       setLoading(false);
     }
@@ -214,7 +216,12 @@ const QuestionBuilder = ({ examId }) => {
                       updateQuestion(idx, "text", e.target.value)
                     }
                   />
-                  <FormControl fullWidth variant="outlined" margin="normal" className="mt-4">
+                  <FormControl
+                    fullWidth
+                    variant="outlined"
+                    margin="normal"
+                    className="mt-4"
+                  >
                     <InputLabel id={`language-label-${idx}`}>
                       Student Response Language
                     </InputLabel>
@@ -229,6 +236,7 @@ const QuestionBuilder = ({ examId }) => {
                     >
                       <MenuItem value="tr">Turkish</MenuItem>
                       <MenuItem value="en">English</MenuItem>
+                      <MenuItem value="de">German</MenuItem>
                     </Select>
                   </FormControl>
                   <Button
@@ -272,7 +280,6 @@ const QuestionBuilder = ({ examId }) => {
 
         {/* Actions */}
         <div className="flex justify-between items-center pt-4">
-          {/* Back Button (sola yaslı) */}
           <Button
             variant="outlined"
             color="secondary"
@@ -282,7 +289,6 @@ const QuestionBuilder = ({ examId }) => {
             ← Back
           </Button>
 
-          {/* Right side buttons */}
           <div className="flex gap-2">
             <Button
               onClick={addQuestion}

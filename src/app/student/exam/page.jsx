@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@mui/material";
-import Footer from "../../components/Footer";
-import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar";
-import ExamResult from "../../components/ExamResult";
+import Footer from "../../../components/Footer";
+import Sidebar from "../../../components/Sidebar";
+import Navbar from "../../../components/Navbar";
+import ExamResult from "../../../components/ExamResult";
 import { useRouter } from "next/navigation";
 
 const ExamLayout = () => {
@@ -44,29 +44,37 @@ const ExamLayout = () => {
 
   useEffect(() => {
     if (!studentId) return;
-  
+
     const fetchExamsAndSubmissions = async () => {
       try {
         const res = await fetch(
           `http://localhost:4000/api/students/${studentId}/exams`
         );
         const data = await res.json();
-  
+
         const examsFromServer = data.exams || [];
-  
-        // Şimdi submissions'ları getir
-        const subRes = await fetch(`http://localhost:4000/api/exam-submissions/${studentId}`);
+
+        const subRes = await fetch(
+          `http://localhost:4000/api/exam-submissions/${studentId}`
+        );
         const subData = await subRes.json();
+
         const submittedExamIds = subData.success
-          ? subData.submissions.map((s) => s.exam)
+          ? subData.submissions
+              .filter((s) => s.status === "completed" && s.exam)
+              .map((s) =>
+                typeof s.exam === "object"
+                  ? s.exam._id?.toString()
+                  : s.exam?.toString()
+              )
+              .filter(Boolean)
           : [];
-  
-        // Her exam'a isSubmitted flag'i ekle
+
         const updatedExams = examsFromServer.map((exam) => ({
           ...exam,
-          isSubmitted: submittedExamIds.includes(exam._id),
+          isSubmitted: submittedExamIds.includes(exam._id.toString()),
         }));
-  
+
         setExams(updatedExams);
       } catch (err) {
         console.error("Error fetching exams or submissions:", err);
@@ -74,58 +82,73 @@ const ExamLayout = () => {
         setLoading(false);
       }
     };
-  
+
     fetchExamsAndSubmissions();
   }, [studentId]);
 
-  // Sıralama:
-  // 1) Başlamamış (examStartTime > now) sınavlar yukarıda.
-  // 2) Biten ya da başlayan (examStartTime <= now) sınavlar aşağıda.
-  // İki grup da kendi içinde artan tarih sıralaması (en erken tarihten en geçe).
+  useEffect(() => {
+    if (!studentId || exams.length === 0) return;
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    exams.forEach((exam) => {
+      const examDate = new Date(exam.examDate);
+      const examDay = new Date(
+        examDate.getFullYear(),
+        examDate.getMonth(),
+        examDate.getDate()
+      );
+
+      const isExpired = examDay < today;
+
+      if (isExpired && !exam.isSubmitted) {
+        fetch("http://localhost:4000/api/exam-submissions/autocomplete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ studentId, examId: exam._id }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            if (data.success) {
+              console.log(" Auto-completed:", exam.examName);
+            }
+          })
+          .catch((err) => console.error("Auto-complete error:", err));
+      }
+    });
+  }, [exams, studentId]);
+
   const sortedExams = [...exams].sort((a, b) => {
     const now = new Date();
     const aStart = new Date(`${a.date}T${a.time}`);
     const bStart = new Date(`${b.date}T${b.time}`);
 
-    const aNotStarted = aStart > now; // a henüz başlamamış mı?
-    const bNotStarted = bStart > now; // b henüz başlamamış mı?
+    const aNotStarted = aStart > now; 
+    const bNotStarted = bStart > now; 
 
-    // a başlamamış, b başlamış => a önce
     if (aNotStarted && !bNotStarted) return -1;
-    // a başlamış, b başlamamış => b önce
     if (!aNotStarted && bNotStarted) return 1;
 
-    // İkisi de aynı kategorideyse (ikisi de başlamamış veya ikisi de başlamış),
-    // artan tarih sıralaması
     return aStart - bStart;
   });
 
   return (
     <div className="min-h-screen bg-slate-100">
-      {/* Navbar */}
       <Navbar />
-
       <div className="pt-24 px-4 flex gap-4">
-        {/* Left Column */}
         <div className="w-64 flex flex-col gap-4">
-          {/* Sidebar */}
           <Sidebar activeLink={activeLink} setActiveLink={setActiveLink} />
-
-          {/* Exam Results */}
           <ExamResult student={studentId} />
         </div>
-
-        {/* Exams */}
         <div className="bg-white flex-1 p-8">
           <div className="flex justify-between items-center p-6">
-            {/* Ortalanmış Başlık */}
             <h1 className="text-2xl font-bold text-slate-800 flex-1">
               Upcoming Exams
             </h1>
           </div>
           <div className="flex flex-col gap-6 p-6">
             {sortedExams.map((exam) => {
-              const now = new Date();
               const examDate = new Date(exam.examDate);
               const isValidDate = exam.examDate && examDate.getTime() > 0;
 
@@ -138,7 +161,7 @@ const ExamLayout = () => {
                 buttonText = "Start Exam";
                 isButtonDisabled = true;
                 buttonClasses = "bg-gray-400 text-gray-200 cursor-not-allowed";
-              } else if (exam.status === "completed") {
+              } else if (exam.isSubmitted) {
                 buttonText = "Show Result";
                 isButtonDisabled = false;
                 buttonClasses = "bg-green-600 text-white hover:bg-green-700";
@@ -146,19 +169,13 @@ const ExamLayout = () => {
                 buttonText = "Start Exam";
                 isButtonDisabled = true;
                 buttonClasses = "bg-gray-400 text-gray-200 cursor-not-allowed";
-              }
-
-              if (exam.isSubmitted) {
-                buttonText = "Submitted";
-                isButtonDisabled = true;
-                buttonClasses = "bg-gray-300 text-gray-500 cursor-not-allowed";
-              }
+              } 
 
               const handleButtonClick = () => {
                 if (buttonText === "Show Result") {
-                  router.push("/showResult");
+                  router.push(`/student/showResult/${exam._id}`);
                 } else if (buttonText === "Start Exam" && !isButtonDisabled) {
-                  router.push(`/examInterface/${exam._id}`);
+                  router.push(`/student/examInterface/${exam._id}`);
                 }
               };
 

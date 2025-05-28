@@ -33,31 +33,46 @@ const TeacherLessonView = ({ courseId, teacherId }) => {
     fetchCourseAndExams();
   }, [courseId]);
 
+  const fetchExamStatuses = async () => {
+    const res = await fetch(
+      `http://localhost:4000/api/exams/exam-status/${courseId}`
+    );
+    const data = await res.json();
+    return data.success ? data.statuses : [];
+  };
+
   const fetchCourseAndExams = async () => {
     try {
-      const response = await fetch(
+      const courseRes = await fetch(
         `http://localhost:4000/api/courses/${courseId}`
       );
-      const data = await response.json();
+      const courseData = await courseRes.json();
 
-      if (data.success) {
-        const examsWithQuestions = await Promise.all(
-          data.course.exams.map(async (exam) => {
-            const examResponse = await fetch(
-              `http://localhost:4000/api/exams/${exam._id}`
-            );
-            const examData = await examResponse.json();
-            return { ...exam, questions: examData.exam?.questions || [] };
-          })
-        );
+      const statusRes = await fetchExamStatuses();
+
+      if (courseData.success) {
+        const examsWithStatus = courseData.course.exams.map((exam) => {
+          const matchedStatus = statusRes.find((e) => e.examId === exam._id);
+          return {
+            ...exam,
+            status: matchedStatus?.status || "pending",
+            averageScore: matchedStatus?.averageScore || 0,
+            successRate: matchedStatus?.successRate || 0,
+            timeSpent: matchedStatus?.timeSpent || "N/A",
+            studentResults: matchedStatus?.studentResults || [],
+            highestScore: matchedStatus?.highestScore || 0,
+            lowestScore: matchedStatus?.lowestScore || 0,
+          };
+        });
+
         setLessonContent({
-          title: data.course.courseName,
-          description: data.course.description,
-          totalExams: data.course.exams.length,
-          completedExams: data.course.exams.filter(
-            (exam) => exam.status === "completed"
+          title: courseData.course.courseName,
+          description: courseData.course.description,
+          totalExams: examsWithStatus.length,
+          completedExams: examsWithStatus.filter(
+            (e) => e.status === "completed"
           ).length,
-          exams: examsWithQuestions,
+          exams: examsWithStatus,
         });
       }
     } catch (error) {
@@ -79,30 +94,17 @@ const TeacherLessonView = ({ courseId, teacherId }) => {
   const ExamStatistics = ({ exam }) => {
     if (exam.status !== "completed") return null;
 
-    const highestScoreGroup = exam.studentResults?.reduce((prev, current) =>
-      prev.count > current.count ? prev : current
-    );
-
-    const lowestScoreGroup = exam.studentResults?.reduce((prev, current) =>
-      prev.count < current.count ? prev : current
-    );
-
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
         <StatisticItem
           icon={<Award />}
           label="Average Score"
-          value={`${exam.averageScore || 0}%`}
+          value={`${Number(exam.averageScore).toFixed(2)}%`}
         />
         <StatisticItem
           icon={<FileText />}
           label="Success Rate"
-          value={`${exam.successRate || 0}%`}
-        />
-        <StatisticItem
-          icon={<Clock />}
-          label="Avg. Time Spent"
-          value={exam.timeSpent ?? "N/A"}
+          value={`${Number(exam.successRate).toFixed(2)}%`}
         />
         <StatisticItem
           icon={<BarChart3 />}
@@ -112,12 +114,12 @@ const TeacherLessonView = ({ courseId, teacherId }) => {
         <StatisticItem
           icon={<XCircle />}
           label="Lowest Score"
-          value={lowestScoreGroup?.name ?? "N/A"}
+          value={`${Number(exam.lowestScore).toFixed(2)}`}
         />
         <StatisticItem
           icon={<CheckCircle2 />}
           label="Highest Score"
-          value={highestScoreGroup?.name ?? "N/A"}
+          value={`${Number(exam.highestScore).toFixed(2)}`}
         />
       </div>
     );
@@ -175,9 +177,11 @@ const TeacherLessonView = ({ courseId, teacherId }) => {
           </div>
           <progress
             value={
-              (lessonContent.completedExams / lessonContent.totalExams) * 100
+              lessonContent.totalExams === 0
+                ? 0
+                : (lessonContent.completedExams / lessonContent.totalExams) *
+                  100
             }
-            className="w-full h-3 mt-4"
           />
         </CardContent>
       </Card>
@@ -212,17 +216,17 @@ const TeacherLessonView = ({ courseId, teacherId }) => {
                 {exam.questions && exam.questions.length > 0 ? (
                   <Button
                     size="small"
-                    className="bg-green-500 text-white hover:bg-green-600"
-                    onClick={() => router.push(`/createQuestions/${exam._id}`)}
+                    className="bg-green-500 text-white"
+                    onClick={() => router.push(`/teacher/createQuestions/${exam._id}`)}
                   >
-                    <VisibilityIcon className="mr-1 w-8 h-8" />
+                    <VisibilityIcon className="mr-1 w-8 h-8 " />
                     View Questions
                   </Button>
                 ) : (
                   <Button
                     size="small"
-                    className="bg-blue-500 text-white hover:bg-blue-600"
-                    onClick={() => router.push(`/createQuestions/${exam._id}`)}
+                    className="bg-blue-500 text-white"
+                    onClick={() => router.push(`/teacher/createQuestions/${exam._id}`)}
                   >
                     <Plus className="mr-1" />
                     Add Questions

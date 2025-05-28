@@ -1,10 +1,9 @@
 import React from "react";
 import { Modal, Box, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import TeacherKnowledgeForm from '@/components/admin/TeacherKnowledgeForm'
+import TeacherKnowledgeForm from "@/components/admin/TeacherKnowledgeForm";
 
 const TeacherKnowledgeModal = ({ open, onClose, existingTeacher }) => {
-    
   return (
     <Modal open={open} onClose={onClose} aria-labelledby="modal-title">
       <Box
@@ -32,7 +31,10 @@ const TeacherKnowledgeModal = ({ open, onClose, existingTeacher }) => {
           </IconButton>
         </div>
 
-        <TeacherKnowledgeForm existingTeacher={existingTeacher} onClose={onClose} />
+        <TeacherKnowledgeForm
+          existingTeacher={existingTeacher}
+          onClose={onClose}
+        />
       </Box>
     </Modal>
   );

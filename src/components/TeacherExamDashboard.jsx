@@ -14,8 +14,10 @@ import PersonIcon from "@mui/icons-material/Person";
 import BookIcon from "@mui/icons-material/Book";
 import { useRouter } from "next/navigation";
 import ConfirmAlert from "@/components/ConfirmAlert";
+import { useToast } from "@/components/context/ToastContext";
 
 export default function TeacherExamDashboard({ userId }) {
+  const { showToast } = useToast();
   const [teacher, setTeacher] = useState(null);
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -89,11 +91,11 @@ export default function TeacherExamDashboard({ userId }) {
           prev.filter((course) => course._id !== selectedCourseId)
         );
       } else {
-        alert("Failed to remove the course.");
+        showToast("Failed to remove the course.", "error");
       }
     } catch (err) {
       console.error("Error:", err);
-      alert("An error occurred while removing the course.");
+      showToast("An error occurred while removing the course.", "error");
     } finally {
       setConfirmOpen(false);
       setSelectedCourseId(null);
@@ -163,9 +165,18 @@ export default function TeacherExamDashboard({ userId }) {
                 </Box>
                 <Box className="flex items-center gap-2">
                   <BookIcon fontSize="small" className="text-indigo-600" />
-                  <Typography variant="body2" className="text-gray-600">
-                    {examCounts[course._id] ?? 0} Exams
-                  </Typography>
+                  {examCounts[course._id] > 0 ? (
+                    <Typography variant="body2" className="text-gray-600">
+                      {examCounts[course._id]} Exams
+                    </Typography>
+                  ) : (
+                    <Typography
+                      variant="body2"
+                      className="text-gray-400 italic"
+                    >
+                      0 Exams
+                    </Typography>
+                  )}
                 </Box>
               </Box>
 
@@ -175,7 +186,7 @@ export default function TeacherExamDashboard({ userId }) {
                   size="small"
                   color="secondary"
                   className="w-full bg-gradient-to-r from-indigo-500 to-indigo-700 text-white"
-                  onClick={() => router.push(`/lessonView/${course._id}`)}
+                  onClick={() => router.push(`/teacher/lessonView/${course._id}`)}
                 >
                   View
                 </Button>

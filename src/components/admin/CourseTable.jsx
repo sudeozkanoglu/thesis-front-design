@@ -6,8 +6,10 @@ import {
 import { Search } from "lucide-react";
 import AdminSidebar from "./AdminSidebar";
 import AddCourseForm from "./CourseKnowledges";
+import { useToast } from "@/components/context/ToastContext";
 
 const CourseList = () => {
+  const { showToast } = useToast();
   const [activeSection, setActiveSection] = useState("course-settings");
   const [openModal, setOpenModal] = useState(false);
   const [courses, setCourses] = useState([]); // API'den gelen dersleri saklar
@@ -52,13 +54,14 @@ const CourseList = () => {
 
       const data = await response.json();
       if (data.success) {
-        alert("Course deleted successfully!");
+        showToast("Course deleted successfully!", "success");
         fetchCourses(); // Listeyi güncelle
       } else {
-        alert("Failed to delete course");
+        showToast("Failed to delete course", "error");
       }
     } catch (error) {
       console.error("Error deleting course:", error);
+      showToast("An error occurred while deleting the course.", "error");
     }
   };
 

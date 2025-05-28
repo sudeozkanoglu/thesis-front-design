@@ -24,16 +24,42 @@ const Sidebar = ({ activeLink, setActiveLink }) => {
 
     if (userType === "Teacher") {
       const adjustedPath =
-        basePath === "/" ? "Dashboard" : capitalizeFirstLetter(basePath.slice(1));
-      return `/teacher${adjustedPath}`;
+        basePath === "/teacher"
+          ? "Dashboard"
+          : capitalizeFirstLetter(basePath.slice(1));
+      return `/teacher/teacher${adjustedPath}`;
+    } else if (userType === "Student") {
+      const adjustedPath =
+        basePath === "/student"
+          ? "Dashboard"
+          : (basePath.slice(1));
+      return `/student/${adjustedPath}`;
     }
     return basePath;
   };
 
-  const handleLogout = () => {
-    localStorage.removeItem("userType");
-    localStorage.removeItem("token");
-    router.push("/login");
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("http://localhost:4000/api/user/logout", {
+        method: "GET",
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        localStorage.removeItem("userType");
+        localStorage.removeItem("token");
+        router.push("/login");
+      } else {
+        console.error("Logout failed:", data.message);
+      }
+    } catch (error) {
+      console.error("Fetch error during logout:", error);
+      localStorage.removeItem("userType");
+      localStorage.removeItem("token");
+      router.push("/login");
+    }
   };
 
   const links = [

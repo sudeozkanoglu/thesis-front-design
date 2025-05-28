@@ -1,15 +1,26 @@
 "use client"; 
 
-import React from "react";
+import React, {useEffect, useState} from "react";
 import Navbar from "@/components/Navbar";
 import Sidebar from "@/components/Sidebar";
 import ExamResult from "@/components/ExamResult";
 import Footer from "@/components/Footer";
 import ShowResult from "@/components/ShowResult";
+import { useParams } from "next/navigation";
 
 const Results = () => {
     const [activeLink, setActiveLink] = React.useState("Results");
-    
+    const [userId, setUserId] = useState(null);
+    const params = useParams();
+    const examId = params.examId;
+
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+          const storedUserId = localStorage.getItem("userId");
+          setUserId(storedUserId);
+        }
+      }, []);
+
     return (
         <div className="min-h-screen bg-slate-100">
             <Navbar />
@@ -17,12 +28,12 @@ const Results = () => {
             {/* Left Column */}
             <div className="w-64 flex flex-col gap-4">
                 <Sidebar activeLink={activeLink} setActiveLink={setActiveLink} />
-                <ExamResult />
+                <ExamResult student={userId} />
             </div>
     
             {/* Right Column */}
             <div className="flex-1 bg-white rounded-lg shadow-md p-6">
-                <ShowResult />
+                <ShowResult examId={examId} studentId={userId}/>
             </div>
             </div>
             <Footer />

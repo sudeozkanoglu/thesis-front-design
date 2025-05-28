@@ -13,8 +13,10 @@ import {
   Select,
   MenuItem,
 } from "@mui/material";
+import { useToast } from "@/components/context/ToastContext";
 
 const StudentKnowledgeModal = ({ open, onClose, existingStudent }) => {
+  const { showToast } = useToast();
   const [studentData, setStudentData] = useState({
     firstName: "",
     lastName: "",
@@ -72,14 +74,14 @@ const StudentKnowledgeModal = ({ open, onClose, existingStudent }) => {
 
       const data = await response.json();
       if (data.success) {
-        alert("Student updated successfully!");
-        onClose(); // Close modal after success
+        showToast("Student updated successfully!", "success");
+        onClose();
       } else {
-        alert("Error updating student: " + data.message);
+        showToast("Error updating student: " + data.message, "error");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("An error occurred while updating the student.");
+      showToast("An error occurred while updating the student.", "error");
     }
   };
 

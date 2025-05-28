@@ -9,8 +9,10 @@ import { Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import {useToast} from "@/components/context/ToastContext";
 
 const RegisterPage = () => {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -56,11 +58,11 @@ const RegisterPage = () => {
       if (response.data.success) {
         router.push("/login");
       } else {
-        alert(response.data.message);
+        showToast(response.data.message, "error");
       }
     } catch (error) {
       console.error("Error during registration:", error);
-      alert("An error occurred.");
+      showToast("An error occurred.", "error");
     }
   };
 

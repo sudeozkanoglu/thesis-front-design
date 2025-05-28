@@ -1,10 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import Footer from "../../components/Footer";
-import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar";
-import ExamResult from "../../components/ExamResult";
-import RegisterCourseModal from "../../components/RegisterCourseModal";
+import Footer from "../../../components/Footer";
+import Sidebar from "../../../components/Sidebar";
+import Navbar from "../../../components/Navbar";
+import ExamResult from "../../../components/ExamResult";
+import RegisterCourseModal from "../../../components/RegisterCourseModal";
 
 const DashboardLayout = () => {
   const [activeLink, setActiveLink] = useState("Profile");
@@ -70,7 +70,7 @@ const DashboardLayout = () => {
     const now = new Date();
     const month = now.getMonth();
     const year = now.getFullYear();
-  
+
     if ([8, 9, 10, 11].includes(month)) {
       return `${year}-${year + 1} Fall Semester`;
     } else if (month === 0) {
@@ -159,11 +159,13 @@ const DashboardLayout = () => {
                             <span
                               className={`font-medium ${
                                 submission
-                                  ? getScoreColor(submission.score)
+                                  ? getScoreColor(submission.overall_score)
                                   : "text-gray-400 italic"
                               }`}
                             >
-                              {submission ? submission.score : "Not taken yet"}
+                              {submission
+                                ? submission.overall_score.toFixed(2)
+                                : "Not taken yet"}
                             </span>
                           </div>
                         );

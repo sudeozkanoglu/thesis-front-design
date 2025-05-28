@@ -8,6 +8,7 @@ import {
   Typography,
   MenuItem,
 } from "@mui/material";
+import { useToast } from "./context/ToastContext";
 
 const modalStyle = {
   position: "absolute",
@@ -22,7 +23,7 @@ const modalStyle = {
 };
 
 const ExamCreationModal = ({ open, onClose, courseId, onExamCreated, teacherId }) => {
-
+  const { showToast } = useToast();
   const [examForm, setExamForm] = useState({
     examName: "",
     examType: "",
@@ -35,7 +36,7 @@ const ExamCreationModal = ({ open, onClose, courseId, onExamCreated, teacherId }
 
   const handleAddExam = async () => {
     if (!examForm.examName || !examForm.examType) {
-      alert("Exam Name and Exam Type are required.");
+      showToast("Exam Name and Exam Type are required.", "error");
       return;
     }
 
@@ -59,16 +60,16 @@ const ExamCreationModal = ({ open, onClose, courseId, onExamCreated, teacherId }
       const data = await response.json();
 
       if (data.success) {
-        alert("Exam created successfully!");
-        onExamCreated(); // Refresh exam list
+        showToast("Exam created successfully!", "success");
+        onExamCreated(); 
         setExamForm({ examName: "", examType: "", instructions: "" });
         onClose();
       } else {
-        alert(`Error: ${data.message}`);
+        showToast(`Error: ${data.message}`, "error");
       }
     } catch (error) {
       console.error("Error adding exam:", error);
-      alert("Failed to create exam.");
+      showToast("Failed to create exam.", "error");
     }
   };
 

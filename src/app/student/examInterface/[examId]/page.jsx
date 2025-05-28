@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
-import AudioExamInterface from "../../../components/ExamInterface";
+import AudioExamInterface from "../../../../components/ExamInterface";
 
 export default function ExamPage() {
   const { examId } = useParams();

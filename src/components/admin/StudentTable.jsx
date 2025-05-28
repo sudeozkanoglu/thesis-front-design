@@ -14,11 +14,11 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { useToast } from "@/components/context/ToastContext";
 import StudentKnowledgeModal from "@/components/admin/StudentKnowledgeModal";
 
 const StudentTable = ({ students, fetchStudents }) => {
-  const router = useRouter();
+  const { showToast } = useToast();
   const [openModal, setOpenModal] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState(null);
@@ -49,14 +49,14 @@ const StudentTable = ({ students, fetchStudents }) => {
 
       const data = await response.json();
       if (data.success) {
-        alert("Student deleted successfully!");
+        showToast("Student deleted successfully!", "success");
         fetchStudents(); // Refresh student list
       } else {
-        alert("Error deleting student: " + data.message);
+        showToast("Error deleting student: " + data.message, "error");
       }
     } catch (error) {
       console.error("Error:", error);
-      alert("An error occurred while deleting the student.");
+      showToast("An error occurred while deleting the student.", "error");
     } finally {
       setOpenDialog(false);
       setSelectedStudent(null);

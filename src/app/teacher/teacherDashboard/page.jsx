@@ -14,6 +14,7 @@ const TeacherDashboard = () => {
   const [error, setError] = useState(null);
   const [userId, setUserId] = useState(null);
   const [calendarData, setCalendarData] = useState([]);
+  const [latestExamId, setLatestExamId] = useState(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -85,8 +86,22 @@ const TeacherDashboard = () => {
         console.error("Error fetching teacher exams:", err);
       }
     };
+
+    const fetchLatestCompletedExam = async () => {
+    try {
+      const res = await fetch(`http://localhost:4000/api/exams/${userId}/latest-completed-exam`);
+      const data = await res.json();
+
+      if (data.success && data.exam) {
+        setLatestExamId(data.exam._id);
+      }
+    } catch (err) {
+      console.error("Error fetching latest completed exam:", err);
+    }
+  };
   
     fetchTeacherExams();
+    fetchLatestCompletedExam();
   }, [userId]);
 
   return (
@@ -96,7 +111,7 @@ const TeacherDashboard = () => {
         {/* Left Column */}
         <div className="w-64 flex flex-col gap-4">
           <Sidebar activeLink={activeLink} setActiveLink={setActiveLink} />
-          <ExamStatistics />
+          {latestExamId && <ExamStatistics examId={latestExamId} />}
         </div>
 
         {/* Right Column */}
