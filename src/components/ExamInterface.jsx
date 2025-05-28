@@ -82,7 +82,7 @@ const AudioExamInterface = ({ questions = [], duration, exam, student }) => {
       });
 
       showToast("Time is up! Your exam is being submitted.", "info");
-      router.push("/exam");
+      router.push("/student/exam");
     }
   }, [timeLeft]);
 
@@ -268,7 +268,7 @@ const AudioExamInterface = ({ questions = [], duration, exam, student }) => {
                 className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-md hover:bg-green-700"
                 onClick={() => {
                   submitAnswer();
-                  router.push("/exam");
+                  router.push("/student/exam");
                 }}
               >
                 <Check className="w-5 h-5" />
