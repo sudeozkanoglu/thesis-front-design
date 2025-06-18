@@ -217,7 +217,7 @@ const TeacherLessonView = ({ courseId, teacherId }) => {
                   <Button
                     size="small"
                     className="bg-green-500 text-white"
-                    onClick={() => router.push(`/teacher/createQuestions/${exam._id}`)}
+                    onClick={() => router.push(`/teacher/createQuestions/${exam._id}?status=${exam.status}`)}
                   >
                     <VisibilityIcon className="mr-1 w-8 h-8 " />
                     View Questions

@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import ExamRulesModal from "@/components/ExamRulesModal";
 import { useToast } from "@/components/context/ToastContext";
 
-const AudioExamInterface = ({ questions = [], duration, exam, student }) => {
+const AudioExamInterface = ({ questions = [], duration, exam, student, examKnowledge }) => {
   const { showToast } = useToast();
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [timeLeft, setTimeLeft] = useState(() => duration * 60);
@@ -29,6 +29,16 @@ const AudioExamInterface = ({ questions = [], duration, exam, student }) => {
   const [showRulesModal, setShowRulesModal] = useState(true);
   const [startTimer, setStartTimer] = useState(false);
 
+  const languageMap = {
+    tr: "Turkish",
+    en: "English",
+    de: "German",
+  };
+
+  const currentLangCode =
+    questions[currentQuestion]?.language?.toLowerCase() || "tr";
+  const displayLanguage = languageMap[currentLangCode] || "Turkish";
+
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -37,12 +47,13 @@ const AudioExamInterface = ({ questions = [], duration, exam, student }) => {
 
   const submitAnswer = async () => {
     const blob = recordingBlobs[currentQuestion];
-    if (!blob) return showToast("No recording found for this question!", "error");
+    if (!blob)
+      return showToast("No recording found for this question!", "error");
 
     const formData = new FormData();
     formData.append("audio", blob);
-    formData.append("examId", exam); 
-    formData.append("studentId", student); 
+    formData.append("examId", exam);
+    formData.append("studentId", student);
     formData.append("questionId", questions[currentQuestion]._id);
     formData.append("language", questions[currentQuestion].language || "tr");
 
@@ -161,7 +172,7 @@ const AudioExamInterface = ({ questions = [], duration, exam, student }) => {
         <div className="bg-white rounded-lg shadow-md p-4 mb-6">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-bold text-slate-800">
-              English for Tourism and Hospitality - Final Exam
+              {examKnowledge.course?.courseName} - {examKnowledge.examName}
             </h1>
             <div className="flex items-center gap-2 text-slate-600">
               <Clock className="w-5 h-5" />
@@ -189,7 +200,16 @@ const AudioExamInterface = ({ questions = [], duration, exam, student }) => {
               />
             </div>
 
-            <div className="mt-8">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-xl px-6 py-4 text-center shadow-sm">
+              <p className="text-md font-medium text-gray-800">
+                Please translate your answer into{" "}
+                <span className="text-red-700 font-bold underline decoration-red-400 underline-offset-4">
+                  {displayLanguage}
+                </span>
+                .
+              </p>
+            </div>
+            <div className="mt-4">
               <div className="aspect-video bg-slate-100 rounded-lg overflow-hidden mb-4 relative">
                 {isRecording && (
                   <div className="absolute top-2 right-2 bg-red-600 text-white px-3 py-1 rounded-full flex items-center gap-2 text-sm shadow-lg z-10">

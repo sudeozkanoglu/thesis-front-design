@@ -111,7 +111,9 @@ const StudentTable = ({ students, fetchStudents }) => {
                   >
                     📚 Courses:{" "}
                     {student.courses.length > 0
-                      ? student.courses.map((course) => course.courseName).join(", ")
+                      ? student.courses
+                          .map((course) => course.courseName)
+                          .join(", ")
                       : "Not enrolled"}
                   </Typography>
 
@@ -169,7 +171,10 @@ const StudentTable = ({ students, fetchStudents }) => {
       {/* 📌 Student Update Modal */}
       <StudentKnowledgeModal
         open={openModal}
-        onClose={() => setOpenModal(false)}
+        onClose={() => {
+          setOpenModal(false);
+          fetchStudents();
+        }}
         existingStudent={selectedStudent}
       />
     </div>

@@ -195,7 +195,10 @@ const TeacherTable = ({ teachers, fetchTeachers }) => {
 
       <TeacherKnowledgeModal
         open={openModal}
-        onClose={() => setOpenModal(false)}
+        onClose={() => {
+          setOpenModal(false);
+          fetchTeachers();
+        }}
         existingTeacher={selectedTeacher}
       />
     </div>

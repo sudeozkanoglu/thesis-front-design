@@ -143,13 +143,45 @@ export default function TeacherKnowledgeForm({ existingTeacher, onClose }) {
     }));
   };
 
+  const [formErrors, setFormErrors] = useState({});
+
+  const validateForm = () => {
+    const errors = {};
+
+    if (!formData.firstName.trim()) errors.firstName = "First name is required";
+    if (!formData.lastName.trim()) errors.lastName = "Last name is required";
+    if (!formData.degreeLevel.trim()) errors.degreeLevel = "Degree is required";
+    if (!formData.department.trim())
+      errors.department = "Department is required";
+    if (!formData.phoneNumber.trim()) errors.phoneNumber = "Phone is required";
+    if (!formData.email.trim()) errors.email = "Email is required";
+    if (!formData.password.trim()) errors.password = "Password is required";
+    if (!formData.roomNumber.trim())
+      errors.roomNumber = "Room number is required";
+    if (formData.schools.some((school) => !school.name.trim()))
+      errors.schools = "All school names are required";
+    if (formData.schools.some((school) => !school.degree.trim()))
+      errors.schools = "All degrees are required";
+    if (formData.expertiseAreas.some((area) => !area.trim()))
+      errors.expertiseAreas = "All expertise areas are required";
+    if (formData.officeHours.some((hours) => !hours.day.trim()))
+      errors.officeHours = "All office hours days are required";
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
+    if (!validateForm()) {
+      showToast("Please fill in the required fields.", "error");
+      return;
+    }
     const url = existingTeacher
       ? `http://localhost:4000/api/teacher/${existingTeacher._id}`
       : "http://localhost:4000/api/teacher/add";
-  
+
     try {
       const response = await fetch(url, {
         method: existingTeacher ? "PUT" : "POST",
@@ -158,16 +190,22 @@ export default function TeacherKnowledgeForm({ existingTeacher, onClose }) {
         },
         body: JSON.stringify(formData), // FormData yerine JSON gönder
       });
-  
+
       const data = await response.json();
-  
+
       if (data.success) {
         showToast(
           existingTeacher
             ? "Teacher updated successfully!"
-            : "Teacher added successfully!"
-        , "success");
-        onClose();
+            : "Teacher added successfully!",
+          "success"
+        );
+        if (typeof onClose === "function") {
+          onClose();
+        } else {
+          router.push("/admin/listTeacher");
+        }
+
         router.refresh();
       } else {
         showToast(`Error: ${data.message}`, "error");
@@ -199,10 +237,17 @@ export default function TeacherKnowledgeForm({ existingTeacher, onClose }) {
                 onChange={(e) =>
                   setFormData({ ...formData, firstName: e.target.value })
                 }
-                className="w-full p-2 border rounded"
+                className={`w-full p-2 border rounded ${
+                  formErrors.firstName ? "border-red-500" : ""
+                }`}
                 placeholder="Laura"
                 required
               />
+              {formErrors.firstName && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.firstName}
+                </p>
+              )}
             </div>
             <div>
               <label className="block mb-2 font-bold">Last Name</label>
@@ -213,10 +258,17 @@ export default function TeacherKnowledgeForm({ existingTeacher, onClose }) {
                 onChange={(e) =>
                   setFormData({ ...formData, lastName: e.target.value })
                 }
-                className="w-full p-2 border rounded"
+                className={`w-full p-2 border rounded ${
+                  formErrors.lastName ? "border-red-500" : ""
+                }`}
                 placeholder="Smith"
                 required
               />
+              {formErrors.lastName && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.lastName}
+                </p>
+              )}
             </div>
             <div>
               <label className="block mb-2 font-bold">Degree Level</label>
@@ -227,10 +279,17 @@ export default function TeacherKnowledgeForm({ existingTeacher, onClose }) {
                 onChange={(e) =>
                   setFormData({ ...formData, degreeLevel: e.target.value })
                 }
-                className="w-full p-2 border rounded"
+                className={`w-full p-2 border rounded ${
+                  formErrors.degreeLevel ? "border-red-500" : ""
+                }`}
                 placeholder="Senior English Teacher"
                 required
               />
+              {formErrors.degreeLevel && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.degreeLevel}
+                </p>
+              )}
             </div>
             <div>
               <label className="block mb-2 font-bold">Department</label>
@@ -241,10 +300,17 @@ export default function TeacherKnowledgeForm({ existingTeacher, onClose }) {
                 onChange={(e) =>
                   setFormData({ ...formData, department: e.target.value })
                 }
-                className="w-full p-2 border rounded"
+                className={`w-full p-2 border rounded ${
+                  formErrors.department ? "border-red-500" : ""
+                }`}
                 placeholder="English Department"
                 required
               />
+              {formErrors.department && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.department}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -264,10 +330,17 @@ export default function TeacherKnowledgeForm({ existingTeacher, onClose }) {
                 onChange={(e) =>
                   setFormData({ ...formData, phoneNumber: e.target.value })
                 }
-                className="w-full p-2 border rounded"
+                className={`w-full p-2 border rounded ${
+                  formErrors.phoneNumber ? "border-red-500" : ""
+                }`}
                 placeholder="(555) 555-5555"
                 required
               />
+              {formErrors.phoneNumber && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.phoneNumber}
+                </p>
+              )}
             </div>
             <div>
               <label className="block mb-2 font-bold">Email</label>
@@ -278,10 +351,15 @@ export default function TeacherKnowledgeForm({ existingTeacher, onClose }) {
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                className="w-full p-2 border rounded"
+                className={`w-full p-2 border rounded ${
+                  formErrors.email ? "border-red-500" : ""
+                }`}
                 placeholder="example@hotmail.com"
                 required
               />
+              {formErrors.email && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
+              )}
             </div>
             <div>
               <label className="block mb-2 font-bold">Password</label>
@@ -292,10 +370,17 @@ export default function TeacherKnowledgeForm({ existingTeacher, onClose }) {
                 onChange={(e) =>
                   setFormData({ ...formData, password: e.target.value })
                 }
-                className="w-full p-2 border rounded"
+                className={`w-full p-2 border rounded ${
+                  formErrors.password ? "border-red-500" : ""
+                }`}
                 placeholder="********"
                 required
               />
+              {formErrors.password && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.password}
+                </p>
+              )}
             </div>
             <div>
               <label className="block mb-2 font-bold">Room Number</label>
@@ -307,8 +392,15 @@ export default function TeacherKnowledgeForm({ existingTeacher, onClose }) {
                   setFormData({ ...formData, roomNumber: e.target.value })
                 }
                 placeholder="Room 101"
-                className="w-full p-2 border rounded"
+                className={`w-full p-2 border rounded ${
+                  formErrors.roomNumber ? "border-red-500" : ""
+                }`}
               />
+              {formErrors.roomNumber && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.roomNumber}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -330,7 +422,9 @@ export default function TeacherKnowledgeForm({ existingTeacher, onClose }) {
                   value={school.name}
                   onChange={(e) => updateSchool(index, "name", e.target.value)}
                   placeholder="University of California"
-                  className="w-full p-2 border rounded"
+                  className={`w-full p-2 border rounded ${
+                    formErrors.schools ? "border-red-500" : ""
+                  }`}
                 />
               </div>
               <div>
@@ -342,9 +436,18 @@ export default function TeacherKnowledgeForm({ existingTeacher, onClose }) {
                     updateSchool(index, "degree", e.target.value)
                   }
                   placeholder="Bachelor of Arts in English"
-                  className="w-full p-2 border rounded"
+                  className={`w-full p-2 border rounded ${
+                    formErrors.schools ? "border-red-500" : ""
+                  }`}
                 />
               </div>
+              {formErrors.schools && (
+                <div className="col-span-2">
+                  <p className="text-red-500 text-sm mt-1">
+                    {formErrors.schools}
+                  </p>
+                </div>
+              )}
             </div>
           ))}
           <button
@@ -369,10 +472,17 @@ export default function TeacherKnowledgeForm({ existingTeacher, onClose }) {
                 value={area}
                 onChange={(e) => updateExpertiseArea(index, e.target.value)}
                 placeholder="English Literature"
-                className="w-full p-2 border rounded"
+                className={`w-full p-2 border rounded ${
+                  formErrors.expertiseAreas ? "border-red-500" : ""
+                }`}
               />
             </div>
           ))}
+          {formErrors.expertiseAreas && (
+            <p className="text-red-500 text-sm mt-1">
+              {formErrors.expertiseAreas}
+            </p>
+          )}
           <button
             type="button"
             onClick={addExpertiseArea}

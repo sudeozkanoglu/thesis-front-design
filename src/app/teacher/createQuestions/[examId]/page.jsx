@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import Footer from "@/components/Footer";
 import Sidebar from "@/components/Sidebar";
 import Navbar from "@/components/Navbar";
@@ -8,6 +8,9 @@ import QuestionBuilder from "@/components/QuestionBuilder";
 import ExamStatistics from "@/components/ExamStatistics";
 
 const CreateQuestions = () => {
+  const searchParams = useSearchParams();
+  const status = searchParams.get("status");
+  const [isEditable, setIsEditable] = useState(true);
   const [activeLink, setActiveLink] = useState("Exam");
   const { examId } = useParams();
 
@@ -44,6 +47,12 @@ const CreateQuestions = () => {
     fetchLatestCompletedExam();
   }, [userId]);
 
+  useEffect(() => {
+    if (status === "completed") {
+      setIsEditable(false);
+    }
+  }, [status]);
+
   return (
     <div className="min-h-screen bg-slate-100">
       <Navbar />
@@ -56,7 +65,7 @@ const CreateQuestions = () => {
 
         {/* Right Column */}
         <div className="flex-1 bg-white rounded-lg shadow-md p-6">
-          <QuestionBuilder examId={examId} />
+          <QuestionBuilder examId={examId} isEditable={isEditable} />
         </div>
       </div>
       <Footer />

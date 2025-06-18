@@ -7,6 +7,7 @@ export default function ExamPage() {
   const { examId } = useParams();
   const [studentId, setStudentId] = useState(null);
   const [questions, setQuestions] = useState([]);
+  const [examKnowledge, setExamKnowledge] = useState([]);
   const [duration, setDuration] = useState(30);
 
   useEffect(() => {
@@ -26,6 +27,7 @@ export default function ExamPage() {
         if (data.success && data.exam) {
           setQuestions(data.exam.questions || []);
           setDuration(data.exam.duration || 30);
+          setExamKnowledge(data.exam || []);
         }
       } catch (error) {
         console.error("Failed to fetch questions:", error);
@@ -40,6 +42,7 @@ export default function ExamPage() {
       questions={questions}
       duration={duration}
       exam={examId}
+      examKnowledge={examKnowledge}
       student={studentId}
     />
   );

@@ -24,7 +24,7 @@ import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { useToast } from "@/components/context/ToastContext";
 
-const QuestionBuilder = ({ examId }) => {
+const QuestionBuilder = ({ examId, isEditable = true }) => {
   const router = useRouter();
   const { showToast } = useToast();
   const [examTime, setExamTime] = useState({ hours: 0, minutes: 0 });
@@ -180,6 +180,7 @@ const QuestionBuilder = ({ examId }) => {
               <TextField
                 label="Minutes"
                 type="number"
+                disabled={!isEditable}
                 value={examTime.minutes}
                 onChange={(e) =>
                   setExamTime({ ...examTime, minutes: Number(e.target.value) })
@@ -190,6 +191,7 @@ const QuestionBuilder = ({ examId }) => {
               <DatePicker
                 label="Exam Date"
                 value={examDate}
+                disabled={!isEditable}
                 onChange={(newDate) => setExamDate(newDate)}
                 renderInput={(params) => <TextField {...params} />}
               />
@@ -209,6 +211,7 @@ const QuestionBuilder = ({ examId }) => {
                   <TextField
                     fullWidth
                     multiline
+                    disabled={!isEditable}
                     rows={4}
                     placeholder="Enter the question"
                     value={q.text}
@@ -227,6 +230,7 @@ const QuestionBuilder = ({ examId }) => {
                     </InputLabel>
                     <Select
                       labelId={`language-label-${idx}`}
+                      disabled={!isEditable}
                       id={`language-select-${idx}`}
                       label="Student Response Language"
                       value={q.language || "tr"}
@@ -254,8 +258,8 @@ const QuestionBuilder = ({ examId }) => {
                     )}
                   </Button>
                 </div>
-                {questions.length > 1 && (
-                  <Button onClick={() => removeQuestion(idx)} className="mt-10">
+                {questions.length > 1 && isEditable &&  (
+                  <Button onClick={() => removeQuestion(idx)} className="mt-10" >
                     <Trash2 className="text-red-500" />
                   </Button>
                 )}
@@ -265,6 +269,7 @@ const QuestionBuilder = ({ examId }) => {
                   <TextField
                     fullWidth
                     multiline
+                    disabled={!isEditable}
                     rows={2}
                     placeholder="Type the answer here..."
                     value={q.answer}
@@ -293,6 +298,7 @@ const QuestionBuilder = ({ examId }) => {
             <Button
               onClick={addQuestion}
               variant="contained"
+              disabled={!isEditable}
               color="primary"
               className="flex items-center gap-2"
             >
@@ -305,7 +311,7 @@ const QuestionBuilder = ({ examId }) => {
               variant="contained"
               color="success"
               className="flex items-center gap-2"
-              disabled={loading}
+              disabled={!isEditable || loading}
             >
               <CheckCheck className="h-4 w-4" />
               {loading ? "Submitting..." : "Complete Adding Questions"}

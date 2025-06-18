@@ -111,7 +111,6 @@ const ExamLayout = () => {
           .then((res) => res.json())
           .then((data) => {
             if (data.success) {
-              console.log(" Auto-completed:", exam.examName);
             }
           })
           .catch((err) => console.error("Auto-complete error:", err));
@@ -124,8 +123,8 @@ const ExamLayout = () => {
     const aStart = new Date(`${a.date}T${a.time}`);
     const bStart = new Date(`${b.date}T${b.time}`);
 
-    const aNotStarted = aStart > now; 
-    const bNotStarted = bStart > now; 
+    const aNotStarted = aStart > now;
+    const bNotStarted = bStart > now;
 
     if (aNotStarted && !bNotStarted) return -1;
     if (!aNotStarted && bNotStarted) return 1;
